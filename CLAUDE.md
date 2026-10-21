@@ -1,5 +1,9 @@
 # AmpolaTech
 
+## Working mode
+
+AmpolaTech is a product to ship, not a learning project. The agent writes the code; the author reviews it and makes the decisions. nesto's coach mode does not apply here.
+
 ## References
 
 - **nesto** ([`decasamerlo/nesto`](https://github.com/decasamerlo/nesto), public) is the same author's project and the starting point for this repo's conventions: `docs/conventions/` (ADRs, commits, markdown, test fixtures, domain-layer isolation, database naming), `CONTEXT.md` for the glossary style, and `backend/` for a hexagonal Java layout.
