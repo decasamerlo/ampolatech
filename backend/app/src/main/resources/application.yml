@@ -1,0 +1,16 @@
+# The URL and both passwords come from the environment: SPRING_DATASOURCE_URL,
+# SPRING_DATASOURCE_PASSWORD and SPRING_LIQUIBASE_PASSWORD.
+spring:
+  application:
+    name: ampolatech
+  datasource:
+    # The runtime role: owns no tables and can't bypass row-level security (ADR 0003).
+    username: ampolatech_app
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    # Migrations run as the owner, so the runtime role owns nothing.
+    user: ampolatech_owner
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
