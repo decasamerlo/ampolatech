@@ -4,6 +4,8 @@
 
 AmpolaTech is a product to ship, not a learning project. The agent writes the code; the author reviews it and makes the decisions. nesto's coach mode does not apply here.
 
+Every change reaches `main` through a pull request, stacked when it depends on another: `docs/conventions/git.md` says how to name the branch, write the commit and the PR body, and build and merge a stack with `gh stack`.
+
 ## References
 
 - **nesto** ([`decasamerlo/nesto`](https://github.com/decasamerlo/nesto), public) is the same author's project and the starting point for this repo's conventions: `docs/conventions/` (ADRs, commits, markdown, test fixtures, domain-layer isolation, database naming), `CONTEXT.md` for the glossary style, and `backend/` for a hexagonal Java layout.

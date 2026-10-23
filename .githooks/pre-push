@@ -1,0 +1,11 @@
+#!/bin/sh
+# Refuses a push to main: changes reach it only through pull requests
+# (docs/conventions/git.md). Turned on per clone with
+# `git config core.hooksPath .githooks`; `git push --no-verify` skips it.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "pre-push: main takes changes only through pull requests; see docs/conventions/git.md" >&2
+    exit 1
+  fi
+done
+exit 0
