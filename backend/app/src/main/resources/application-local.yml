@@ -1,0 +1,24 @@
+# The local profile: Docker Compose's PostgreSQL, the demo data and the demo
+# sign-in. The passwords are the ones compose.yaml gives the database roles;
+# they protect nothing but a local demo.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${AMPOLATECH_POSTGRES_PORT:5432}/ampolatech
+    password: app-local
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-local.yaml
+    password: owner-local
+    # The demo seed (db/changelog/local/) inserts the demo user from these.
+    parameters:
+      demo-user-id: ${ampolatech.sign-in.demo.user-id}
+      demo-pharmacy-id: ${ampolatech.sign-in.demo.pharmacy-id}
+      demo-role: ${ampolatech.sign-in.demo.role}
+
+ampolatech:
+  sign-in:
+    demo:
+      enabled: true
+      # The demo sales agent of the demo pharmacy.
+      user-id: 60601aa5-a0b7-4676-86eb-01a2dd58c7f5
+      pharmacy-id: 54452d02-054a-4448-88c2-2b26a9f7c2a1
+      role: SALES_AGENT
