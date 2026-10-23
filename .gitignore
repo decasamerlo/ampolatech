@@ -8,3 +8,9 @@ CLAUDE.local.md
 .classpath
 .settings/
 /backend/**/bin/
+
+# Gradle's caches, its Kotlin plugin's, and the build output. Only
+# build/ is tied to backend/, since a build/ elsewhere may hold sources.
+.gradle/
+.kotlin/
+/backend/**/build/
