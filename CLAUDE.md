@@ -11,10 +11,11 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 - **Creating a branch, a commit or a pull request, or building or merging a stack?** The commit message is the only text a squash merge keeps on `main`. See `docs/conventions/git.md`.
 - **Writing or changing a code comment?** A comment outlives the conversation that produced it, and agents read it as instruction. See `docs/conventions/comments.md`.
 - **Writing or changing Java?** google-java-format fixes the layout, not when `var` fits, the order of members, the shape of a method, or names and imports. See `docs/conventions/java.md`.
+- **Adding a table, a constraint or a JPA entity?** PostgreSQL reserves some of the most natural table names, `user` and `order` among them. See `docs/conventions/database-naming.md`.
 
 ## References
 
-- **nesto** ([`decasamerlo/nesto`](https://github.com/decasamerlo/nesto), public) is the same author's project and the starting point for this repo's conventions: `docs/conventions/` (ADRs, commits, markdown, test fixtures, domain-layer isolation, database naming), `CONTEXT.md` for the glossary style, and `backend/` for a hexagonal Java layout.
+- **nesto** ([`decasamerlo/nesto`](https://github.com/decasamerlo/nesto), public) is the same author's project and the starting point for this repo's conventions: `docs/conventions/` (ADRs, commits, markdown, test fixtures, domain-layer isolation, database naming), `CONTEXT.md` for the glossary style, and `backend/` for a hexagonal Java layout. Where this repo's own `docs/conventions/` covers the same topic, it wins.
 - **Other codebases the author has access to** are listed in `CLAUDE.local.md`, which is not committed. They are not public, so *Non-public sources* below applies to anything drawn from them.
 - **Pharmacy software and standards** worth reading are surveyed in `docs/research/reference-software.md`.
 
