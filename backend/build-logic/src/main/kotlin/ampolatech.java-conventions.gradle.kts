@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("com.diffplug.spotless")
 }
 
 group = "dev.ampolatech"
@@ -18,4 +19,18 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+val catalog = the<VersionCatalogsExtension>().named("libs")
+
+// Each option is google-java-format's own command-line default, so that command line formats
+// exactly as the build checks. Spotless defaults reflowLongStrings and reorderImports to false.
+spotless {
+    java {
+        googleJavaFormat(catalog.findVersion("google-java-format").get().requiredVersion)
+            .style("GOOGLE")
+            .reflowLongStrings(true)
+            .reorderImports(true)
+            .formatJavadoc(true)
+    }
 }

@@ -33,11 +33,14 @@ When a changeset that already ran on your local database changes, Liquibase refu
 From `backend/`:
 
 ```bash
-./gradlew build                                             # every module and every test
+./gradlew build                                             # every module, every test and the format check
+./gradlew spotlessApply                                     # format the Java with google-java-format
 ./gradlew :app:test --tests 'dev.ampolatech.SignedInUserTest'   # one test class
 ```
 
 The tests start PostgreSQL with Testcontainers on a random port, so they need Docker running but no free port.
+
+An editor formats the way the build checks when it runs google-java-format's command line, at the version in `gradle/libs.versions.toml` and with its default options.
 
 ## Modules
 

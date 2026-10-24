@@ -2,6 +2,9 @@
 spring-boot = "4.1.2"
 junit = "6.1.3"
 assertj = "3.27.7"
+spotless = "8.10.4"
+# 1.37.0 fails to load in Spotless 8.10.4 (diffplug/spotless#3126).
+google-java-format = "1.36.1"
 
 [libraries]
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
@@ -18,6 +21,7 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 postgresql = { module = "org.postgresql:postgresql" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
+spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
