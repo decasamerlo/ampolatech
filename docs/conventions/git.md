@@ -47,7 +47,7 @@ Co-Authored-By: <the agent, when one wrote the change>
 
 - **The title is the commit subject.**
 - **The body follows [the PR template](../../.github/pull_request_template.md)**, in English, written for the reviewer. It says what the diff and the commit body don't, and its Verification is evidence, never checkboxes. AI attribution goes only in the commit's trailer.
-- **The issue line** is `Closes #N.` on the PR that finishes the issue, and `Refs #N.` on one that contributes to it without finishing it. GitHub acts on a closing keyword only in a PR based on `main`, which a stacked layer becomes once the layers below it have merged; whether `gh stack merge`, which merges them together, closes an upper layer's issue is untried.
+- **The issue line** is `Closes #N.` on the PR that finishes the issue, and `Refs #N.` on one that contributes to it without finishing it. When a stack merges, each layer's `Closes #N.` closes its issue, the upper layers' included, although only the bottom layer is based on `main`.
 
 ## Building a stack
 
