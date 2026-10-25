@@ -1,1 +1,10 @@
 CLAUDE.local.md
+
+# Written by IDEs that run the Java language server: the Eclipse metadata
+# Buildship imports the Gradle build into, and the classes the IDE
+# compiles into each module's bin/. Only bin/ is tied to backend/, since
+# a bin/ elsewhere may hold scripts.
+.project
+.classpath
+.settings/
+/backend/**/bin/
