@@ -228,7 +228,7 @@ jOOQ "policies" are "jOOQ's primary way to implement client side row level secur
 
 Everything in this section is analysis, built on the facts above.
 
-The owner's values point at three tests. **Explicit:** can a reader see the tenant in the code? **Correct:** can one mistake leak data? **Principled:** is the boundary something the code can prove?
+[The author's values](../conventions/author-values.md) point at three tests. **Explicit:** can a reader see the tenant in the code? **Correct:** can one mistake leak data? **Principled:** is the boundary something the code can prove?
 
 ### The options compared
 

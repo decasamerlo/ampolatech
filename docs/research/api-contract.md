@@ -380,7 +380,7 @@ A browser can speak the Connect protocol or gRPC-Web, but not gRPC over HTTP/2. 
 
 ## Options for AmpolaTech (analysis)
 
-Everything in this section is analysis, weighed against the author's stated values: correctness over speed, explicit over magic, principled decisions, and extra code accepted for a cleaner result.
+Everything in this section is analysis, weighed against [the author's stated values](../conventions/author-values.md): correctness over speed, explicit over magic, principled decisions, and extra code accepted for a cleaner result.
 
 | | 1. OpenAPI contract-first | 2. OpenAPI code-first | 3. Hand-written | 4. Protobuf + Connect |
 |---|---|---|---|---|
