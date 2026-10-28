@@ -35,6 +35,7 @@ These are signs, not bans: each one stays when its reason is written beside it.
 
 - **A workaround** makes a symptom go away and leaves its cause: a swallowed exception, a retry or a sleep around a race, a skipped test, a suppressed warning, `--no-verify`, a hard-coded value where data should flow, a flag that bypasses a check.
 - **Misplaced code** works, but sits where the layout says it doesn't belong: a business rule in an adapter, a framework type in the domain, build logic outside the build's documented home, a helper copied instead of shared.
+- **A misleading name** works, but tells a reader something the code isn't: a package named for a direction its code doesn't take, a driven port the application never calls, a Java type carrying a prefix only its table needs. No compiler or test catches it, and every reader pays for it until it is renamed. A move or a rename leaves one behind most often: whoever moves or renames something checks the packages, names and comments that described it, including the layers above it in a stack.
 - **Inherited code** is there only because a scaffold, a template or the code before it did it that way.
 
 ## Explicit over magic
@@ -68,6 +69,8 @@ A reviewer weighs its own suggested fixes by this convention. In a diff, it flag
 - a commit body that gives speed or less rework as the reason for a choice;
 - a departure from a tool's documented practice with no reason given;
 - a claim that decides a choice and is neither checked here nor attributed to its source.
+
+It reports a misleading name as a defect rather than a judgement call, fixed in the layer that introduced it (*When rework decides*), and looks for one past the diff, as the sign in *What wrong looks like* describes.
 
 ## Examples
 

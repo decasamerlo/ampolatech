@@ -4,7 +4,7 @@
 
 AmpolaTech is a product to ship, not a learning project. The agent writes the code; the author reviews it and makes the decisions. nesto's coach mode does not apply here.
 
-**Weighing two ways to do something, or drawn to one because it means less rework or a faster result?** The author takes the more correct option and pays for the rework. See `docs/conventions/author-values.md`.
+**Weighing two ways to do something, drawn to one because it means less rework or a faster result, or moving or renaming code?** The author takes the more correct option and pays for the rework, and counts a misleading name as wrong even when nothing breaks. See `docs/conventions/author-values.md`.
 
 Every change reaches `main` through a pull request, stacked when it depends on another.
 
