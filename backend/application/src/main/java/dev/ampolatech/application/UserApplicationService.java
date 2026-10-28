@@ -24,7 +24,7 @@ public class UserApplicationService implements GetSignedInUserQuery {
 
   private User userOf(Actor actor) {
     return users
-        .findById(actor.pharmacyId(), actor.userId())
+        .findById(actor.userId(), actor.pharmacyId())
         .orElseThrow(
             () ->
                 new IllegalStateException(

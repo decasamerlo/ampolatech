@@ -11,5 +11,5 @@ import java.util.Optional;
  */
 public interface UserRepositoryPort {
 
-  Optional<User> findById(PharmacyId pharmacyId, UserId id);
+  Optional<User> findById(UserId id, PharmacyId pharmacyId);
 }

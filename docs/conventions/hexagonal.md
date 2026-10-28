@@ -21,7 +21,7 @@ What an adapter may ask of the application, one interface per operation.
 
 What the application needs from outside, each implemented by an adapter.
 
-- **`{Aggregate}RepositoryPort`** persists an aggregate, such as `UserRepositoryPort`. Every method takes the `PharmacyId` it works within (ADR 0003), and its Javadoc says so.
+- **`{Aggregate}RepositoryPort`** persists an aggregate, such as `UserRepositoryPort`. Every method takes the `PharmacyId` it works within as its last parameter (ADR 0003), and its Javadoc says so. What the method acts on comes first and the pharmacy that scopes it after, `findById(UserId id, PharmacyId pharmacyId)`, so the adapter passes them in the same order to the Spring Data method whose name lists them, `findByIdAndPharmacyId`.
 - **`{Capability}Port`** names any other need by what it provides.
 
 ### `find`, `get` and `list`
