@@ -17,3 +17,4 @@ rootProject.name = "ampolatech-backend"
 
 include(":domain")
 include(":application")
+include(":persistence")
