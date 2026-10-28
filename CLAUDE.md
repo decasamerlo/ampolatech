@@ -13,6 +13,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 - **Creating a branch, a commit or a pull request, or building or merging a stack?** The commit message is the only text a squash merge keeps on `main`. See `docs/conventions/git.md`.
 - **Writing or changing a code comment?** A comment outlives the conversation that produced it, and agents read it as instruction. See `docs/conventions/comments.md`.
 - **Writing or changing Java?** google-java-format fixes the layout, not when `var` fits, the order of members, the shape of a method, or names and imports. See `docs/conventions/java.md`.
+- **Adding or changing a port, an adapter or an application service?** Every port lives in the `domain` module, and a driving port takes the actor as an input. See `docs/conventions/hexagonal.md`.
 - **Adding a table, a constraint or a JPA entity?** PostgreSQL reserves some of the most natural table names, `user` and `order` among them. See `docs/conventions/database-naming.md`.
 
 ## References

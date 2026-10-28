@@ -10,6 +10,14 @@ Software for compounding pharmacies that make sterile injectables and hormone pe
 A compounding pharmacy that uses AmpolaTech. Every user works for exactly one pharmacy.
 _Avoid_: Client, customer, org, tenant
 
+**User**:
+A member of a pharmacy's staff who signs in to AmpolaTech. Their role, such as sales agent or pharmacist, sets what they may do.
+_Avoid_: Account, login
+
+**Actor**:
+The user a request acts for, as far as the request needs them: who they are, the pharmacy they work for, and their role.
+_Avoid_: Principal
+
 **Doctor**:
 The physician who wrote a prescription. Doctors don't use AmpolaTech; they send their prescriptions to a sales agent over WhatsApp.
 _Avoid_: User, customer
