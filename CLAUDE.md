@@ -14,6 +14,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 - **Writing or changing a code comment?** A comment outlives the conversation that produced it, and agents read it as instruction. See `docs/conventions/comments.md`.
 - **Writing or changing Java?** google-java-format fixes the layout, not when `var` fits, the order of members, the shape of a method, or names and imports. See `docs/conventions/java.md`.
 - **Adding or changing a port, an adapter or an application service?** Every port lives in the `domain` module, and a driving port takes the actor as an input. See `docs/conventions/hexagonal.md`.
+- **Writing or changing a test, or behaviour that needs one?** Each behaviour is tested at one seam, the domain types, the HTTP API or the web app end to end, and the seam decides what the test may use. See `docs/conventions/testing.md`.
 - **Adding a table, a constraint or a JPA entity?** PostgreSQL reserves some of the most natural table names, `user` and `order` among them. See `docs/conventions/database-naming.md`.
 
 ## References
