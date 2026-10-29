@@ -24,3 +24,12 @@ dependencies {
 sourceSets.test {
     resources.srcDir(rootProject.file("postgres"))
 }
+
+// The Dockerfile copies the executable jar by this name, and nothing uses the plain jar.
+tasks.bootJar {
+    archiveFileName = "ampolatech.jar"
+}
+
+tasks.jar {
+    enabled = false
+}

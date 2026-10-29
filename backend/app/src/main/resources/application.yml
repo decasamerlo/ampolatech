@@ -1,5 +1,6 @@
 # The URL and both passwords come from the environment: SPRING_DATASOURCE_URL,
-# SPRING_DATASOURCE_PASSWORD and SPRING_LIQUIBASE_PASSWORD.
+# SPRING_DATASOURCE_PASSWORD and SPRING_LIQUIBASE_PASSWORD. The local profile
+# sets them in application-local.yml.
 spring:
   application:
     name: ampolatech
