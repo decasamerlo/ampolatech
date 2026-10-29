@@ -23,7 +23,8 @@ String[] activeProfiles = environment.getActiveProfiles();              // no na
 
 ## Member order
 
-- **A class reads from the top down**: constants, fields, constructors, public methods, and each private helper directly below the first method that calls it. Overloads are never split up.
+- **A class reads from the top down**: constants, fields, constructors, then the methods. Overloads are never split up.
+- **A private helper is placed by its callers.** A helper that one method calls sits directly below that method, in the order the method calls its helpers. A helper that two or more methods call comes after every other method, in the order the class first calls them. No spot is directly below all of its callers. Below the first caller, it would sit between that caller and the rest, as between one test and the next. A helper moves in the change that gives it a second caller or leaves it with one.
 - **Nested types come last**, read like helpers after the code that uses them. A record keeps a nested type at the bottom of its body even when one of its components has that type.
 - **A class reads whole, without section comments**; one long enough to need them is split.
 
@@ -44,3 +45,4 @@ String[] activeProfiles = environment.getActiveProfiles();              // no na
 - [Google Java Style](https://google.github.io/styleguide/javaguide.html): braces (§4.1.1), overloads (§3.4.2.1) and naming (§5). Its §3.4.2 leaves member order to each class; the order above is this repository's.
 - OpenJDK's [local variable type inference style guidelines](https://openjdk.org/projects/amber/guides/lvti-style-guide), G3: `var` when the initializer tells the reader the type.
 - Robert C. Martin, *Clean Code*, chapters 3 (Functions) and 5 (Formatting): one level of abstraction per method, vertical spacing and top-down order.
+- Oracle's [Code Conventions for the Java Programming Language](https://www.oracle.com/java/technologies/javase/codeconventions-fileorganization.html), §3.1.3: methods "should be grouped by functionality rather than by scope or accessibility", which is why helpers are placed by their callers and not gathered at the end because they are private.

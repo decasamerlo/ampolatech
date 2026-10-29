@@ -35,6 +35,18 @@ class DemoSignInGuardTest {
                 + printedProfiles);
   }
 
+  @Test
+  @DisplayName("should refuse to start when another profile is active beside the local one")
+  void should_refuse_to_start_when_another_profile_is_active_beside_the_local_one() {
+    Throwable thrown = catchThrowable(() -> start("local,production"));
+
+    assertThat(thrown)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage(
+            "The demo sign-in runs only under the local profile alone,"
+                + " and the active profiles are [local, production]");
+  }
+
   private static void start(String profiles, String... moreArguments) {
     String[] arguments =
         Stream.concat(
@@ -46,17 +58,5 @@ class DemoSignInGuardTest {
                 Stream.of(moreArguments))
             .toArray(String[]::new);
     SpringApplication.run(AmpolaTechApplication.class, arguments).close();
-  }
-
-  @Test
-  @DisplayName("should refuse to start when another profile is active beside the local one")
-  void should_refuse_to_start_when_another_profile_is_active_beside_the_local_one() {
-    Throwable thrown = catchThrowable(() -> start("local,production"));
-
-    assertThat(thrown)
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessage(
-            "The demo sign-in runs only under the local profile alone,"
-                + " and the active profiles are [local, production]");
   }
 }
