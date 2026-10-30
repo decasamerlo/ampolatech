@@ -1,5 +1,9 @@
 CLAUDE.local.md
 
+# Agents' drafts: commit messages, PR bodies, review notes, handoffs. A
+# reboot clears the session's scratchpad, not this folder.
+/.scratch/
+
 # Written by IDEs that run the Java language server: the Eclipse metadata
 # Buildship imports the Gradle build into, and the classes the IDE
 # compiles into each module's bin/. Only bin/ is tied to backend/, since
