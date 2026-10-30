@@ -4,7 +4,7 @@ The rules for the backend's Java that google-java-format leaves open. No checker
 
 ## Layout
 
-google-java-format decides layout, at its defaults. Whitespace, line breaks and the order of imports are whatever it leaves.
+google-java-format decides layout, at its defaults. Whitespace, line breaks and the order of imports are whatever it leaves. `./gradlew build` fails on Java it would change, and `./gradlew spotlessApply` formats it.
 
 ## Local variables
 
@@ -16,8 +16,8 @@ google-java-format decides layout, at its defaults. Whitespace, line breaks and 
 ```java
 var pharmacy = new Pharmacy(PharmacyId.of(UUID.randomUUID()), name); // a constructor
 var primavera = data.pharmacy("Farmácia Primavera");                   // pharmacy() returns a Pharmacy
-var user = currentUser.currentUser();                                   // user holds a User
-ConfiguredUser configured = properties.user();                          // user() returns a ConfiguredUser
+var actor = currentActor.get();                                         // actor holds an Actor
+Actor signedIn = currentActor.get();                                    // neither get() nor signedIn names Actor
 String[] activeProfiles = environment.getActiveProfiles();              // no name says String[]
 ```
 
