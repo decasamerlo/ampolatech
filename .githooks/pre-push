@@ -1,10 +1,53 @@
 #!/bin/sh
 # Refuses a push to main: changes reach it only through pull requests
-# (docs/conventions/git.md). Turned on per clone with
-# `git config core.hooksPath .githooks`; `git push --no-verify` skips it.
+# (docs/conventions/git.md). Then runs google-java-format's check on each
+# branch the push sends whose commits origin doesn't have yet change
+# backend/. Turned on per clone with `git config core.hooksPath .githooks`;
+# `git push --no-verify` skips it.
+set -eu
+
+pushed=""
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [ "$remote_ref" = "refs/heads/main" ]; then
     echo "pre-push: main takes changes only through pull requests; see docs/conventions/git.md" >&2
+    exit 1
+  fi
+  case $local_sha in
+    *[!0]*) pushed="$pushed $local_ref:$local_sha" ;; # a ref name never holds a colon
+    *) ;; # all zeros: the push deletes a branch
+  esac
+done
+
+[ -n "$pushed" ] || exit 0
+
+# mise exec runs Gradle on the Java mise.toml pins, also from a Git client
+# that pushes outside a shell where mise is activated.
+gradlew() {
+  if command -v mise >/dev/null 2>&1; then
+    mise exec -- ./gradlew "$@"
+  else
+    ./gradlew "$@"
+  fi
+}
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+trap 'exit 1' HUP INT TERM
+
+for ref in $pushed; do
+  name=${ref%:*}
+  sha=${ref#*:}
+  changed=$(git rev-list "$sha" --not --remotes=origin |
+    while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r "$commit"; done)
+  printf '%s\n' "$changed" | grep -q '^backend/' || continue
+  [ ! -d "$work/$sha" ] || continue # another ref at this commit passed
+  # The check reads files, so it runs on the pushed commit exported from
+  # Git: the working tree holds one branch of the push at most, with what
+  # isn't committed yet.
+  mkdir "$work/$sha"
+  git archive "$sha" | tar -x -C "$work/$sha"
+  if ! (cd "$work/$sha/backend" && gradlew spotlessCheck --quiet); then
+    echo "pre-push: ${name#refs/heads/} fails the format check above; if google-java-format would change its Java, run ./gradlew spotlessApply in backend/ on that branch and amend" >&2
     exit 1
   fi
 done
