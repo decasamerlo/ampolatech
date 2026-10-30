@@ -75,7 +75,7 @@ Squash, bottom-up. `gh stack merge <pr> --yes --squash` merges the stack up to a
 
 The repository is private on GitHub's free plan, which allows no ruleset, so GitHub itself doesn't stop a push to `main`. Until it does:
 
-- `.githooks/pre-push` refuses a push to `main`. Turn it on once per clone with `git config core.hooksPath .githooks`. `git push --no-verify` skips it, deliberately.
+- `.githooks/pre-push` refuses a push to `main`. For each branch a push sends whose commits `origin` doesn't have yet change `backend/`, it runs `./gradlew spotlessCheck` on that branch's commit, exported from Git, so the checkout and what isn't committed play no part. It refuses the push when the check fails: google-java-format would change the Java, or Gradle didn't run. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
 - The repository allows squash merge only, taking the commit's title and messages, and deletes a PR's branch once it merges.
 
 Once the repository is public, a ruleset on `main` takes over: a pull request required, squash only, no force-push. It requires no approval. The author can't approve their own PR, and an approval rule would force every layer out of its stack to merge, as it does in nesto.
