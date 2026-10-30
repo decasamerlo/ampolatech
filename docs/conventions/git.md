@@ -37,11 +37,12 @@ Refs: #N
 Co-Authored-By: <the agent, when one wrote the change>
 ```
 
-- **Types**: `feat`, `fix`, `docs`, `chore`, `build`. **The scope** is the top-level folder the change lands in (`backend`, `web`) or the docs folder (`adr`, `conventions`), left out when the change has no single home.
+- **Types**: `feat`, `fix`, `docs`, `chore`, `build`. **The scope** is the top-level folder the change lands in (`backend`, `web`) or the docs folder (`adr`, `conventions`), left out when the change has no single home. `CLAUDE.md` points into every folder, so updating its pointer keeps the scope of the change it goes with.
 - **The body is required for `feat` and `fix`**, and recommended for the other types when the why isn't obvious. It takes 1 to 3 paragraphs, about 12 lines; a longer why means two concerns, which split into two PRs, or a decision that belongs in an ADR.
 - **The body is prose**, read in `git log` in an 80-column terminal: no headings, lists, tables or file lists.
 - **The trailers** close the message: `Refs: #N` for the branch's issue, and `Co-Authored-By:` when an agent wrote the change. A commit never carries a closing keyword: closing is the PR body's job.
 - **Every reference must last**: an ADR, a convention, an issue, code in the repository, or the constraint itself written out.
+- **`scripts/check-commits.sh <commit>...` checks the rules above that concern form**: the subject's shape and length, a scope against the changed files, a body for `feat` and `fix`, the prose's wrap (a line that is only a URL may run longer), no heading, list or table in the body, the `Refs:` trailer and no closing keyword. A body over 15 lines of text gets a warning, not a failure. Run it on each new commit, `scripts/check-commits.sh HEAD`, before building on it. `.githooks/pre-push` runs it on each commit a push sends, and review checks the rest, a missing scope among them.
 
 ## PR title and body
 
@@ -75,7 +76,7 @@ Squash, bottom-up. `gh stack merge <pr> --yes --squash` merges the stack up to a
 
 The repository is private on GitHub's free plan, which allows no ruleset, so GitHub itself doesn't stop a push to `main`. Until it does:
 
-- `.githooks/pre-push` refuses a push to `main`. For each branch a push sends whose commits `origin` doesn't have yet change `backend/`, it runs `./gradlew spotlessCheck` on that branch's commit, exported from Git, so the checkout and what isn't committed play no part. It refuses the push when the check fails: google-java-format would change the Java, or Gradle didn't run. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
+- `.githooks/pre-push` refuses a push to `main`, and checks the commits a push sends that `origin` doesn't have yet. It refuses the push when a commit message breaks a rule `scripts/check-commits.sh` checks (see *Commits*). For each branch whose new commits change `backend/`, it runs `./gradlew spotlessCheck` on that branch's commit, exported from Git, so the checkout and what isn't committed play no part. It refuses the push when the check fails: google-java-format would change the Java, or Gradle didn't run. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
 - The repository allows squash merge only, taking the commit's title and messages, and deletes a PR's branch once it merges.
 
 Once the repository is public, a ruleset on `main` takes over: a pull request required, squash only, no force-push. It requires no approval. The author can't approve their own PR, and an approval rule would force every layer out of its stack to merge, as it does in nesto.

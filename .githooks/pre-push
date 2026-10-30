@@ -1,9 +1,10 @@
 #!/bin/sh
 # Refuses a push to main: changes reach it only through pull requests
-# (docs/conventions/git.md). Then runs google-java-format's check on each
-# branch the push sends whose commits origin doesn't have yet change
-# backend/. Turned on per clone with `git config core.hooksPath .githooks`;
-# `git push --no-verify` skips it.
+# (docs/conventions/git.md). Then checks the messages of the commits the
+# push sends that origin doesn't have yet, and runs google-java-format's
+# check on each branch whose new commits change backend/. Turned on per
+# clone with `git config core.hooksPath .githooks`; `git push --no-verify`
+# skips it.
 set -eu
 
 pushed=""
@@ -19,6 +20,19 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 done
 
 [ -n "$pushed" ] || exit 0
+commits=$(for ref in $pushed; do git rev-list "${ref#*:}" --not --remotes=origin; done | sort -u)
+[ -n "$commits" ] || exit 0
+
+checked=0
+# shellcheck disable=SC2086 # one word per commit
+scripts/check-commits.sh $commits || checked=$?
+if [ "$checked" -eq 1 ]; then
+  echo "pre-push: the commit messages above break docs/conventions/git.md; amend them" >&2
+  exit 1
+elif [ "$checked" -ne 0 ]; then
+  echo "pre-push: scripts/check-commits.sh stopped with exit $checked, above, before it checked every message" >&2
+  exit 1
+fi
 
 # mise exec runs Gradle on the Java mise.toml pins, also from a Git client
 # that pushes outside a shell where mise is activated.
