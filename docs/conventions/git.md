@@ -42,7 +42,7 @@ Co-Authored-By: <the agent, when one wrote the change>
 - **The body is prose**, read in `git log` in an 80-column terminal: no headings, lists, tables or file lists.
 - **The trailers** close the message: `Refs: #N` for the branch's issue, and `Co-Authored-By:` when an agent wrote the change. A commit never carries a closing keyword: closing is the PR body's job.
 - **Every reference must last**: an ADR, a convention, an issue, code in the repository, or the constraint itself written out.
-- **`scripts/check-commits.sh <commit>...` checks the rules above that concern form**: the subject's shape and length, a scope against the changed files, a body for `feat` and `fix`, the prose's wrap (a line that is only a URL may run longer), no heading, list or table in the body, the `Refs:` trailer and no closing keyword. A body over 15 lines of text gets a warning, not a failure. Run it on each new commit, `scripts/check-commits.sh HEAD`, before building on it. `.githooks/pre-push` runs it on each commit a push sends, and review checks the rest, a missing scope among them.
+- **`scripts/check-commits.sh <commit>...` checks the rules above that concern form**: the subject's shape and length, a scope against the changed files, a body for `feat` and `fix`, the prose's wrap (a line that is only a URL may run longer), no list or table in the body, no line starting with `#`, which git drops as a comment when the message is edited, the `Refs:` trailer and no closing keyword. A body over 15 lines of text gets a warning, not a failure. Run it on each new commit, `scripts/check-commits.sh HEAD`, before building on it. `.githooks/pre-push` runs it on each commit a push sends, and review checks the rest, a missing scope among them.
 
 ## PR title and body
 

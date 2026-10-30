@@ -88,8 +88,11 @@ for commit in "$@"; do
       breach "body: a line of ${#line} columns, over 72: ${line:0:40}…"
     fi
   done <<<"$prose"
-  if printf '%s\n' "$prose" | grep -Eq '^(#+[[:space:]]|[[:space:]]*([-*+]|[0-9]{1,2}[.)])[[:space:]]|\|)'; then
-    breach "body: a heading, a list item or a table row, where the body is prose"
+  if printf '%s\n' "$body" | grep -q '^#'; then
+    breach "body: a line starting with #, which git drops as a comment when the message is edited; start it with a word"
+  fi
+  if printf '%s\n' "$prose" | grep -Eq '^([[:space:]]*([-*+]|[0-9]{1,2}[.)])[[:space:]]|\|)'; then
+    breach "body: a list item or a table row, where the body is prose"
   fi
   lines=$(printf '%s\n' "$prose" | grep -c '[^[:space:]]' || true)
   if [ "$lines" -gt 15 ]; then
