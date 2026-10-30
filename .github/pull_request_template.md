@@ -1,18 +1,16 @@
 Closes #N.
 <!-- Or Refs #N. when this PR is only part of the issue. -->
 
-## Context
+## Summary
 
-<!-- A short paragraph for the reviewer: the problem, and the approach this PR takes. -->
+<!-- The smallest view that makes the change clear (pseudocode, a call tree, a diff sketch or a file tree) beside a sentence or two on the problem and the approach. Then the file to open first, what can be skimmed, and where you'd like a second opinion. -->
 
-## Where to look first
+## Evidence
 
-<!-- Which file to open first, which parts can be skimmed, and where you'd like a second opinion. -->
+<!-- Before and after: the failing and the passing run, the output, or a screenshot of a visual change. -->
 
-## Verification
+## Merge Danger
 
-<!-- What you ran or clicked, and what you saw. Paste the output where it helps. -->
+**Door:** <!-- one-way or two-way: whether a revert undoes it all -->
 
-## Risk
-
-<!-- What could go wrong once this merges, and how to undo it. Write "None" when nothing can. -->
+**Blast Radius:** <!-- one word, then what could break once this merges -->

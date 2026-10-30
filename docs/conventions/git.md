@@ -6,7 +6,7 @@ How changes reach `main`: branch names, commits, pull requests, and GitHub's nat
 
 1. **Every change reaches `main` through a pull request.**
 2. **One PR, one commit.** Amend instead of adding a commit; squash merge makes that commit the one on `main`.
-3. **A PR changes up to ~400 lines.** A bigger one says why in its Context section, such as generated code or a research note read as a whole; anything else is split into smaller PRs, stacked where one depends on another.
+3. **A PR changes up to ~400 lines.** A bigger one says why in its Summary, such as generated code or a research note read as a whole; anything else is split into smaller PRs, stacked where one depends on another.
 4. **Only the author merges.** An agent merges only when asked to in the session.
 
 ## Vocabulary
@@ -47,7 +47,7 @@ Co-Authored-By: <the agent, when one wrote the change>
 ## PR title and body
 
 - **The title is the commit subject.**
-- **The body follows [the PR template](../../.github/pull_request_template.md)**, in English, written for the reviewer. It says what the diff and the commit body don't, and its Verification is evidence, never checkboxes. AI attribution goes only in the commit's trailer; `.claude/settings.json` turns off the line Claude Code would add to a PR body.
+- **The body follows [the PR template](../../.github/pull_request_template.md)**, in English, written for the reviewer. It says what the diff and the commit body don't, and its Evidence is what was run and seen, never checkboxes. AI attribution goes only in the commit's trailer; `.claude/settings.json` turns off the line Claude Code would add to a PR body.
 - **The issue line** is `Closes #N.` on the PR that finishes the issue, and `Refs #N.` on one that contributes to it without finishing it. When a stack merges, each layer's `Closes #N.` closes its issue, the upper layers' included, although only the bottom layer is based on `main`.
 
 ## Building a stack
