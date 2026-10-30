@@ -47,7 +47,7 @@ Co-Authored-By: <the agent, when one wrote the change>
 ## PR title and body
 
 - **The title is the commit subject.**
-- **The body follows [the PR template](../../.github/pull_request_template.md)**, in English, written for the reviewer. It says what the diff and the commit body don't, and its Verification is evidence, never checkboxes. AI attribution goes only in the commit's trailer.
+- **The body follows [the PR template](../../.github/pull_request_template.md)**, in English, written for the reviewer. It says what the diff and the commit body don't, and its Verification is evidence, never checkboxes. AI attribution goes only in the commit's trailer; `.claude/settings.json` turns off the line Claude Code would add to a PR body.
 - **The issue line** is `Closes #N.` on the PR that finishes the issue, and `Refs #N.` on one that contributes to it without finishing it. When a stack merges, each layer's `Closes #N.` closes its issue, the upper layers' included, although only the bottom layer is based on `main`.
 
 ## Building a stack
