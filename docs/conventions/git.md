@@ -70,7 +70,17 @@ A lone PR is a branch off `main`: `git switch -c <branch> main`, commit, `git pu
 
 ## Merging
 
-Squash, bottom-up. `gh stack merge <pr> --yes --squash` merges the stack up to and including that PR, and `gh stack sync` then rebases what remains onto `main` and pushes it. Pass both: without the PR number it merges the whole stack, and without `--squash`, `--yes` uses whichever merge method was used last. Not yet tried in this repo.
+The author merges a stack in GitHub's interface, squash, bottom-up. After each layer merges, GitHub rebases the next layer onto `main` and force-pushes it, and the local branches catch up in the main checkout:
+
+```bash
+gh stack sync                  # from a stack branch: main fast-forwarded, the rest rebased and pushed
+git branch -D <merged-branch>  # sync keeps it
+gh stack unstack <n> --local   # after the top layer: drops "Stack #<n>" from .git/gh-stack
+```
+
+Each merged stack left in the tracking keeps `main` as its trunk, and once two do, `gh stack view` on `main` stops at `branch "main" belongs to multiple stacks`.
+
+An agent asked to merge runs `gh stack merge <pr> --yes --squash`, which merges the stack up to and including that PR, and the same steps follow. Pass both: without the PR number it merges the whole stack, and without `--squash`, `--yes` uses whichever merge method was used last. Not yet tried in this repo.
 
 ## Protecting `main`
 
