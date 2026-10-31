@@ -42,11 +42,13 @@ The spec lives in the repository. Spring interfaces are generated from it into t
 ### Server: openapi-generator, `spring` generator
 
 **Status.**
+
 - **Latest release: 7.26.0, 2026-10-06** ([releases](https://github.com/OpenAPITools/openapi-generator/releases/tag/v7.26.0)). Releases came roughly monthly through 2026 (7.19.0 on 2026-01-19 through 7.26.0). The Gradle plugin `org.openapi.generator` is on the Gradle Plugin Portal at the same version ([plugin portal metadata](https://plugins.gradle.org/m2/org/openapi/generator/org.openapi.generator.gradle.plugin/maven-metadata.xml)).
 - The `spring` generator is marked `STABLE` ([generator docs at v7.26.0](https://github.com/OpenAPITools/openapi-generator/blob/v7.26.0/docs/generators/spring.md)).
 - **Maintainers.** The project is large: 26.8k stars and 5,776 open issues ([GitHub API](https://api.github.com/repos/OpenAPITools/openapi-generator)). One person, wing328, has 8,169 commits; the next has 1,873 ([contributors](https://github.com/OpenAPITools/openapi-generator/graphs/contributors)).
 
 **Spring Boot 4 and Java 25.**
+
 - **Spring Boot 4 is a supported option, not the default.** `useSpringBoot4` ("Generate code and provide dependencies for use with Spring Boot 4.x") and `useJackson3` ("only allowed when `useSpringBoot4` is set") first appear in the docs of 7.20.0, released 2026-02-16 ([7.20.0 docs](https://github.com/OpenAPITools/openapi-generator/blob/v7.20.0/docs/generators/spring.md); [Jackson 3 PR #22854](https://github.com/OpenAPITools/openapi-generator/pull/22854)). The default is still `useSpringBoot3=true` ([7.26.0 docs](https://github.com/OpenAPITools/openapi-generator/blob/v7.26.0/docs/generators/spring.md)).
 - **Spring Boot 4 fixes are still landing.** In the last two months: JsonNullable with Jackson 3 ([#25151](https://github.com/OpenAPITools/openapi-generator/pull/25151), merged 2026-10-07, after 7.26.0), and a duplicate starter in the Boot 4 POM ([#25209](https://github.com/OpenAPITools/openapi-generator/pull/25209)). Two open issues report Hibernate Validator 9.1 warnings (HV000271) from `@Valid` placement on containers ([#25097](https://github.com/OpenAPITools/openapi-generator/issues/25097), [#25249](https://github.com/OpenAPITools/openapi-generator/issues/25249)).
 - The docs state no Java version. **Verified locally:** with `interfaceOnly`, `useSpringBoot4`, `useJackson3` and `useJspecify`, the 7.26.0 Gradle plugin produced code that compiled with Java 25 against Spring Boot 4.1.1, and a `@WebMvcTest` suite passed against it.
@@ -76,6 +78,7 @@ ResponseEntity<Prescription> uploadPrescription(
   - **A Gradle deprecation.** The build logged a Gradle 11 deprecation (`Configuration.setVisible`) at configuration time. The generator plugin was the only third-party plugin in that build.
 
 **OpenAPI versions.**
+
 - **3.1 is "beta".** Every run logged "OpenAPI 3.1 support is still in beta" (verified locally).
 - **3.2 is rejected.** `openapi: 3.2.0` fails validation with nine errors, and generation stops (verified locally). The generator parses with swagger-parser, "which does not yet support openapi 3.2.0 spec" (maintainer, [#22728](https://github.com/OpenAPITools/openapi-generator/issues/22728)). swagger-parser's own 3.2 request is open ([swagger-parser #2248](https://github.com/swagger-api/swagger-parser/issues/2248)). Its maintainers posted in March 2026 that backlog work across swagger-core and swagger-parser had been limited ([#2284](https://github.com/swagger-api/swagger-parser/issues/2284)).
 
@@ -84,12 +87,14 @@ ResponseEntity<Prescription> uploadPrescription(
 It generates only interfaces and DTOs, as get/set classes or records ([docs source](https://github.com/openapi-processor/openapi-processor-spring/blob/master/docs/modules/ROOT/pages/index.adoc); [`model-type: record`](https://github.com/openapi-processor/openapi-processor-spring/blob/master/docs/modules/ROOT/pages/processor/configuration.adoc)).
 
 **Status.**
+
 - **Latest release: 2026.3.2, 2026-07-07.** 2026.3.1 fixed generated code that no longer compiled on Spring 7 / Spring Boot 4 ([release](https://github.com/openapi-processor/openapi-processor-spring/releases/tag/v2026.3.1)).
 - **One maintainer.** hauner has 1,652 commits; the next human has 1 ([contributors](https://github.com/openapi-processor/openapi-processor-spring/graphs/contributors)).
 - **Its parser reads 3.0, 3.1 and 3.2** ([openapi-parser](https://github.com/openapi-processor/openapi-parser)).
 - **The docs site was unreachable.** docs.openapiprocessor.io failed TLS verification from this machine ("unable to get local issuer certificate"), so the AsciiDoc sources in the repository were read instead.
 
 **Verified locally** with 2026.3.2 and Gradle plugin 2026.2 against Spring Boot 4.1.1:
+
 - **3.2 works.** It accepted `openapi: 3.2.0` and generated the same code as for 3.1.
 - **Records work.** `model-type: record` produced records.
 - **The file part needs a mapping file, and only from 3.0.** It became `MultipartFile` only after adding `string:binary => MultipartFile` to the mapping file, as the docs require ([request body docs](https://github.com/openapi-processor/openapi-processor-spring/blob/master/docs/modules/ROOT/pages/processor/requestbody.adoc)). Even then that worked only with a 3.0 spec. With the 3.1 spelling (`contentMediaType`, no `format`), the file part was generated as `String`. `format: uuid` likewise needs a mapping to become `UUID`.
@@ -105,12 +110,14 @@ Records and 3.2 are real advantages. But a single maintainer and two silent mult
 The generated interface pins paths, parameters and success types. It does not pin error bodies, status codes or the values the advice writes into `errors[].code`. A response validator in the MockMvc tests covers that.
 
 **Atlassian's openapi-request-validator.**
+
 - **Releases and home.** 3.0.0 was released in May 2026 ([Maven Central](https://repo1.maven.org/maven2/com/atlassian/oai/openapi-request-validator-mockmvc/maven-metadata.xml)), renamed from swagger-request-validator. Development moved from Bitbucket to [GitHub](https://github.com/atlassian/openapi-request-validator) on 2026-05-15 ([old README](https://bitbucket.org/atlassian/swagger-request-validator)).
 - **Compatibility.** Its Spring modules are "Compatible with Spring 7+, Spring Boot 4+ and the Jakarta namespace" ([README](https://github.com/atlassian/openapi-request-validator)). Its docs cover OpenAPI 3.0.x and 3.1.x ([OPENAPIv3.md](https://github.com/atlassian/openapi-request-validator/blob/master/docs/OPENAPIv3.md)).
 - **Multipart request bodies are not validated** ("multipart/form-data: No", same page).
 - **It is small.** 17 stars, 33 open issues ([GitHub API](https://api.github.com/repos/atlassian/openapi-request-validator)).
 
 Verified locally with 3.0.0:
+
 - **It catches drift in the error body.** Against the 3.0 copy of the spec it validated the 201, 400 and 404 response bodies, `application/problem+json` included; against the 3.1 spec, the 400 needed the change below. Changing the advice to write `too_lng` instead of `too_long` failed the test with "does not have a value in the enumeration".
 - **Multipart requests need two ignore rules.** The adapter read the form fields as unexpected query parameters and reported a missing body. Both rules had to be set to `IGNORE` for multipart requests.
 - **Composed schemas fail on a 3.1 spec.** The validator injects `additionalProperties: false` into every schema by default. The `allOf` composition of `Problem` and `ValidationProblem` then rejected a valid body, a known interaction ([FAQ](https://github.com/atlassian/openapi-request-validator/blob/master/docs/FAQ.md)). The documented fix, `withResolveCombinators(true)`, worked with the 3.0 copy of the spec but not with the 3.1 spec. With 3.1, declare `ValidationProblem` flat instead of using `allOf`.
@@ -118,7 +125,7 @@ Verified locally with 3.0.0:
 ### Client: TypeScript generators
 
 | | openapi-typescript + openapi-fetch | @hey-api/openapi-ts | Orval |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Latest stable | 7.13.0 / 0.17.0, 2026-02-11 | 0.99.0, 2026-06-22 | 8.43.0, 2026-10-14 |
 | Maintenance | Maintenance mode since 2026-09-19 | One main maintainer; "initial development… pin an exact version" | Several active maintainers |
 | OpenAPI 3.0 / 3.1 | Yes / yes | Yes / yes | Yes / yes |
@@ -135,6 +142,7 @@ Verified locally with 3.0.0:
 Sources and details per tool below. "Local" results come from a run with each tool's latest release against the experiment spec. Each run had a `usage.ts` that uploads a `File`, reads `errors[0].code` from a typed 400, and reuses the generated zod schema, type-checked with `tsc --noEmit --strict` under TypeScript 6.0.3 and 7.0.2. TypeScript 7.0.2 has been npm's `latest` since 2026-07-08 ([npm registry](https://registry.npmjs.org/typescript)).
 
 **openapi-typescript + openapi-fetch.**
+
 - **Unmaintained.** Its maintainer announced on 2026-09-19 that it "won't be getting any more updates", security patches included, and asked users to migrate ([#2874](https://github.com/openapi-ts/openapi-typescript/issues/2874)).
 - **Types only, no zod.** It emits types and no zod ([docs](https://openapi-ts.dev/introduction)).
 - **Uploads go out as JSON by default.** openapi-fetch's default body serializer is `JSON.stringify`, so without a `bodySerializer` the upload went out as `application/json` with `"file":{}` and nothing warned (verified locally; [API docs](https://openapi-ts.dev/openapi-fetch/api)). File parts are typed `string` from both 3.0 and 3.1 (verified locally).
@@ -142,6 +150,7 @@ Sources and details per tool below. "Local" results come from a run with each to
 - **Ruled out:** unmaintained, and it does not work with the current TypeScript.
 
 **@hey-api/openapi-ts.**
+
 - **Stability.** The docs say it "is in initial development… Please pin an exact version" ([get started](https://heyapi.dev/docs/openapi/typescript/get-started)). There has been no stable release since 0.99.0 on 2026-06-22, only `next` snapshots ([npm](https://registry.npmjs.org/@hey-api/openapi-ts)).
 - **Maintainers.** The repository was renamed to [hey-api/hey-api](https://github.com/hey-api/hey-api). One maintainer wrote most commits since 2025-10-21.
 - **Multipart and errors work.** The SDK builds the multipart body itself, and errors are typed from the spec (verified locally).
@@ -150,9 +159,11 @@ Sources and details per tool below. "Local" results come from a run with each to
 - **Advisories.** 0.99.0's dependency tree carried three high-severity js-yaml advisories (`pnpm audit`, verified locally); [#4474](https://github.com/hey-api/hey-api/issues/4474) is closed, but no stable release has shipped since.
 
 **Orval.**
+
 - **Activity.** 8.43.0 came out on 2026-10-14, after 68 stable releases in the past year ([releases](https://github.com/orval-labs/orval/releases)). v8 is ESM-only, needs Node 22.18 or later, and uses `fetch` as the default HTTP client ([v8 notes](https://orval.dev/docs/versions/v8)). Several maintainers share the commits, and there are 24 open issues.
 - **OpenAPI 3.2.** It converts every input to 3.1 internally. It generated the 3.2 `query` operation (verified locally; [PR #3769](https://github.com/orval-labs/orval/pull/3769)).
 - **zod.** Output targets zod 4 ([zod guide](https://orval.dev/docs/guides/zod)). With `override.zod.generateReusableSchemas: true` it emitted one schema per component (verified locally):
+
   ```ts
   export const PrescriptionUpload = zod.object({
     "file": zod.instanceof(Blob),
@@ -162,12 +173,14 @@ Sources and details per tool below. "Local" results come from a run with each to
   export const FieldError = zod.object({ "field": zod.string(),
     "code": zod.enum(['required', 'too_long', 'too_short', 'bad_format', 'unsupported_media_type']), ... });
   ```
+
   Without that flag it emits only per-operation schemas, and nothing for error responses.
 - **Multipart.** The generated function builds `FormData` (verified locally). One quirk: a string passed as the file is wrapped in a `Blob` whose type is the whole `encoding.contentType` list.
 - **Errors.** The default fetch client never throws. It returns `{ data, status }` with one type per status, so narrowing on `status === 400` gives a typed `ValidationProblem`. **The generated TanStack hooks, though, declare the 400 type as `TError` while the request resolves successfully.** TanStack reported `status: "success"` with `data.status: 400` (verified locally). A 14-line custom mutator that throws on `!res.ok` fixes it ([custom client guide](https://orval.dev/docs/guides/custom-client)). After that, `mutation.error.body.errors[0].code` is typed and correct (verified locally).
 - **Runtime.** No runtime package; each operation is inline `fetch`.
 
 **Others.**
+
 - **Kubb** has zod 4 and TanStack plugins, but has made 233 CLI releases in a year, has one dominant maintainer, and its own adapter still warns that 3.2 is unsupported ([#4284](https://github.com/kubb-labs/kubb/issues/4284)).
 - **openapi-zod-client** says it is deprecated in favour of typed-openapi, a one-maintainer project ([typed-openapi](https://github.com/astahmer/typed-openapi)).
 
@@ -198,12 +211,14 @@ Controllers and DTO records are written by hand. springdoc derives the spec from
 ### springdoc-openapi
 
 **Status.**
+
 - **Spring Boot 4 is supported on the 3.x line.** "springdoc-openapi 3.x is compatible with spring-boot 4" ([FAQ](https://springdoc.org/faq.html)).
 - **Latest: 3.1.1, 2026-09-06.** 3.1.0 upgraded to Spring Boot 4.1.0 and swagger-core 2.2.52 ([3.1.0 release](https://github.com/springdoc/springdoc-openapi/releases/tag/v3.1.0)). 3.1.1 fixed seven security advisories, most in its new MCP and Scalar modules, and made MCP opt-in ([3.1.1 release](https://github.com/springdoc/springdoc-openapi/releases/tag/v3.1.1)).
 - **One maintainer.** bnasslahsen has 2,352 commits; the next contributor has 34 ([contributors](https://github.com/springdoc/springdoc-openapi/graphs/contributors)).
 - **Spec version.** Output defaults to OpenAPI 3.1 (`springdoc.api-docs.version`, default `openapi_3_1`, [properties](https://springdoc.org/properties.html)). It cannot emit 3.2, because it builds on swagger-core.
 
 **Generating the spec at build time.**
+
 - **The official Gradle plugin is stale.** [springdoc-openapi-gradle-plugin](https://github.com/springdoc/springdoc-openapi-gradle-plugin) starts the application and downloads `/v3/api-docs`. Its last release is 1.9.0 (2024-06-22) and its last commit 2024-06-23. Open issues ask for Java 25 support ([#172](https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/172)) and Spring Boot Gradle plugin compatibility ([#173](https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/173)), and report configuration-cache incompatibility ([#166](https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/166)).
 - **A test does the job without the plugin** (verified locally):
   - A `@SpringBootTest` fetches `/v3/api-docs` through MockMvc and compares it with the committed `openapi.json`. A Gradle property rewrites the file.
@@ -212,6 +227,7 @@ Controllers and DTO records are written by hand. springdoc derives the spec from
 - **springdoc can stay out of production.** It can be a test-only dependency: production then carries only `swagger-annotations-jakarta`, managed by `springdoc-openapi-bom` since 3.1.1 ([release](https://github.com/springdoc/springdoc-openapi/releases/tag/v3.1.1)), and serves no `/v3/api-docs` (verified locally).
 
 **What the spec says with plain annotations** (verified locally, springdoc 3.1.1 on Spring Boot 4.1.1). On the controller as one would first write it, the spec came out wrong in four places:
+
 1. **`@RequestParam` fields of a multipart request were documented as `in: query`, not as parts of the multipart body.** A client generated from that spec would put the patient's name in the URL, where proxies and access logs keep it. Declaring the text fields as `@RequestPart` fixed the spec. Spring still bound browser-style text parts (no `Content-Type`) to `String` and enforced `@Size` on them.
 2. **Record components were not `required`.** Every field of every record came out optional, so the generated TypeScript types became `field?: T` throughout. Adding `@NotNull` to each non-null component produced the `required` lists. JSpecify's `@Nullable` was ignored, so a field the server sends as `null` was typed as a non-nullable optional string.
 3. **Error responses are absent unless declared.** Each problem response needed an explicit `@ApiResponse(responseCode = "400", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ValidationProblem.class)))`.
@@ -269,7 +285,7 @@ The API is defined in `.proto` files in the repository. Java message classes and
 A browser can speak the Connect protocol or gRPC-Web, but not gRPC over HTTP/2. The FAQ says "Most of Google's gRPC implementations don't support gRPC-Web" and points existing gRPC servers to Envoy ([Connect FAQ](https://connectrpc.com/docs/faq)).
 
 | Server | Browser protocol | In front of it | Same origin as the SPA |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Connect's own JVM server | Does not exist | – | – |
 | Armeria 1.42.0 + `armeria-spring-boot4-starter` | gRPC-Web; JSON unary over plain POST, close to but not the Connect protocol | Nothing | Yes: Armeria owns the port and forwards the rest to Spring MVC's Tomcat |
 | Spring Boot 4.1 gRPC (Spring gRPC 1.1.1) | Neither | Envoy (`grpc_web` or `connect_grpc_bridge`) | Through Envoy routing |
@@ -383,7 +399,7 @@ A browser can speak the Connect protocol or gRPC-Web, but not gRPC over HTTP/2. 
 Everything in this section is analysis, weighed against [the author's stated values](../conventions/author-values.md): correctness over speed, explicit over magic, principled decisions, and extra code accepted for a cleaner result.
 
 | | 1. OpenAPI contract-first | 2. OpenAPI code-first | 3. Hand-written | 4. Protobuf + Connect |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Source of the contract | A reviewed spec file | Annotations, read by reflection | None; two codebases | Reviewed `.proto` files |
 | Server side on Boot 4.1 / Java 25 | openapi-generator 7.26.0, several defaults to override | springdoc 3.1.1; build plugin stale, a test replaces it | Nothing to adopt | No Java Connect server; Armeria or Envoy |
 | DTOs in the adapter | Generated mutable classes | Hand-written records | Hand-written records | Generated immutable protobuf messages |
@@ -420,6 +436,7 @@ Everything in this section is analysis, weighed against [the author's stated val
 5. **Playwright stays for user flows, not for contract drift.**
 
 **Why this one.**
+
 - **It best matches "explicit over magic".** The contract is a file, written on purpose and reviewed like code.
 - **The generators fail loudly on both sides.** That held for every drift tried locally except error bodies, and the validator test closes that gap.
 - **The author already knows the approach.**
@@ -427,6 +444,7 @@ Everything in this section is analysis, weighed against [the author's stated val
 - **The costs are known.** Generated DTOs are mutable classes in 7.26.0, with records due in a later release (`useRecords`); OpenAPI 3.2 is unavailable until swagger-parser supports it; a handful of generator options must be overridden and kept overridden.
 
 **What would change the recommendation.**
+
 - **Switch to code-first (option 2)** if the author prefers hand-written records and Java as the only source, and accepts that wrong annotations produce a wrong but valid spec. Then:
   - run springdoc only in tests;
   - commit the spec through a snapshot test;

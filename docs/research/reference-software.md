@@ -15,7 +15,7 @@ How to read this file:
 No open-source compounding system turned up. GitHub searches for "compounding pharmacy", "farmácia de manipulação", "sterile compounding", "IV compounding" and "electronic batch record" return pharmacy websites, student projects and demos, almost all without a license (see [Dropped](#dropped)). What the open-source world offers are parts: a prescription and dispense model (OpenMRS), production orders with lot genealogy (Odoo, ERPNext), lot ledgers (OpenLMIS, OpenBoxes) and QC lab results (SENAITE).
 
 | Project | License | Stack | Last activity | Read it for |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | OpenMRS core, Dispensing app, Stock Management, FHIR2 | MPL-2.0 (Stock Management: no LICENSE file) | Java/Hibernate; TypeScript/React | commits 2026-10-01 to 2026-10-20 | order and fulfiller status, dispense record, batch choice by expiry |
 | Odoo Community + OCA `quality_control_oca` | LGPL-3.0; AGPL-3.0 | Python, PostgreSQL | Odoo 19.0: 2026-10-20; OCA module: 2026-07-23 | production order, lot traceability, expiry, QC inspection states |
 | ERPNext | GPL-3.0 | Python (Frappe), MariaDB | release v16.51.1, 2026-10-15 | make-to-order chain, batch expiry, quality inspection, retained samples |
@@ -130,7 +130,7 @@ Fagron Tech belongs to the Fagron group. The group's page credits Fagron Tech wi
 Status of the leads from the earlier session:
 
 | Lead | Verdict |
-|---|---|
+| --- | --- |
 | FórmulaCerta is the Brazilian market leader | **Vendor claim only.** The vendor's site calls FórmulaCerta "[O sistema mais usado nas farmácias de manipulação do Brasil](https://www.fagrontech.com.br/)" and "[líder de mercado](https://fagrontech.com.br/solucoes/formulacerta)". A partner case study reports "[mais de 3500 clientes](https://notagateway.com.br/cases/fagron-tech/)". No independent market-share figure was found. |
 | Phusion is the newer cloud product | **Cloud: verified** ([vendor page](https://fagrontech.com.br/solucoes/phusion)). **"Newer": secondary only.** The only source is a partner case study calling it "[recém-lançado](https://notagateway.com.br/cases/fagron-tech/)"; it is undated, and it mentions a contract signed in September 2020. No launch date on the vendor's pages. |
 | Fagron Tech added AI prescription reading in 2025 | **Feature: verified** ([Tech_IA page](https://fagrontech.com.br/solucoes/tech-ia)). **Year: secondary only.** A trade-press article dated [15/09/2025](https://www.baguete.com.br/noticias/ia-agora-le-receitas) says Fagron Tech "acaba de agregar" the feature, built with ChatGPT and the firm Impulso, and processing 50,000 prescriptions a month in 200 pharmacies. The vendor page gives no date. |
@@ -140,7 +140,7 @@ Status of the leads from the earlier session:
 These vendor pages describe compounding in general terms. They are useful as a checklist of what the market treats as basic.
 
 | Product (vendor) | What its own page claims | Source |
-|---|---|---|
+| --- | --- | --- |
 | Pharmacie, Manipulação Humana (Prime Software, Goiânia) | "Pesagem monitorada, Peso médio"; "Rastreabilidade de lotes e processos"; "Controle de qualidade com assinatura digital"; "Emissão de livros e geração do SNGPC"; NF-e, NFS-e, NFC-e, SPED | [page](https://primesoftware.com.br/sistema/pharmacie-manipulacao-humana) |
 | FarmaFácil Manipulação (Prismafive, "desde 1993") | Pesagem Monitorada, Peso Médio, Fichas Técnicas; "Rastreabilidade Total"; one SNGPC file for compounding plus drugstore; NF-e import | [page](https://prismafive.com.br/farmafacil-manipulacao/) |
 | OuroFórmulas (VSM Informática, Assis-SP) | "fórmulas padrão"; "Integração com balanças de precisão… com registro em tempo real"; stage control "desde o recebimento de matéria-prima até o produto final"; lot traceability "até a dispensação ao paciente"; QC checks at every stage; SNGPC files; prescription entry with automated validation; NFS-e | [page](https://www.vsm.com.br/ouroformulas/) |

@@ -96,7 +96,7 @@ Brazil's per-pack medicine serialization does not apply to AmpolaTech's inputs:
 Every vendor checked speaks ZPL or emulates it. Argox's ZPL link is only implied: its PPLZ emulation lists Zebra's GRF graphics format.
 
 | Vendor and model | Languages | Interfaces | Source |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Zebra ZD220 | ZPL II, EPL2; "Link-OS Basic" | USB | [spec sheet](https://www.zebra.com/content/dam/zebra_dam/en/tech-specs/zd220-tech-specs-en-us.pdf) |
 | Zebra ZD230 | ZPL II, EPL2; Link-OS Basic | USB; factory Ethernet or Wi-Fi/Bluetooth | [spec sheet](https://www.zebra.com/content/dam/zebra_dam/en/tech-specs/zd230-tech-specs-en-us.pdf) |
 | Zebra ZD421 | ZPL II, EPL2; full Link-OS | USB; field-installable Ethernet, serial, Wi-Fi | [spec sheet](https://www.zebra.com/content/dam/zebra_dam/en/tech-specs/zd421-tech-specs-en-us.pdf) |
@@ -195,7 +195,7 @@ Almost every balance offers two kinds of link, and only one of them supports mon
 ### Protocols by vendor
 
 | Vendor | Protocol and stability flag | Commands worth knowing | Interfaces and defaults |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Mettler Toledo | MT-SICS. `S S     100.00 g`, where the second field is "S Stable" or "D Unstable ('D' for Dynamic)" (p. 5, p. 77) | `S` stable weight, `SI` immediate, `SIR` repeat, `Z`, `T`, `@` reset (answers with the serial number), `I4` serial number; send `I0` to list supported commands (p. 9) | LA: two serial ports and a USB device fixed to "MT-SICS Host" ([MT-SICS LA reference](https://mt.com/content/dam/non-indexed/po/labtec/12_Miscellaneous/RM-MT-SICS-LA-en.pdf), p. 64). MS-S RS-232 default 9600 8N1, XON/XOFF. `M89` switches to "Sartorius 22 character output format" (p. 67) |
 | Sartorius | SBI: 16 characters (sign, weight, unit, CRLF), or 22 with an ID prefix. No explicit stability character; the printout settings say an unstable value has no unit symbol. Whether the PC interface follows that is unverified | `Esc P` print, `Esc T` tare, `Esc V` zero, `Esc x2_` serial number, `Esc x5_` balance ID (Secura manual, p. ~89) | Secura/Quintix: USB Mini-B with PC-SBI (virtual COM), PC-xBPI, two keyboard modes; RS-232 via an adapter cable; 9600 8O1 (Secura manual). Cubis II: RS-232, USB virtual COM with SBI default ([datasheet](https://www.sartorius.com/download/64168/data-cubis-ii-e-data.pdf)). Entris II/Quintix Pro: [interface note](https://api.sartorius.com/document-hub/dam/download/295216/Interface-Description-Entris-II-Quintix-Pro-Technical-Note-en-Sartorius.pdf) |
 | Shimadzu (TW/TX/TXB) | Sign, 8 digits, unit, CR, with an optional leading "S (53H)" when stable and "U (55H)" when unstable (pp. 123–124) | `D05` single, `D07` single with stability, `D08` single when stable, `D01`–`D03` continuous, `D09` cancel, `T` tare (pp. 125–126) | RS-232C. Presets MODE.1 (Shimadzu, 1200 8N1) and MODE.3–5 emulating Mettler, Sartorius and A&D (p. 132) ([TW/TX/TXB manual](https://www.shimadzu.com/an/sites/shimadzu.com.an/files/pim/pim_document_file/manuals/24012/wind-3e_twtx.pdf)) |
@@ -236,7 +236,7 @@ What the regulation asks of a weighing, from [RDC 67/2007](https://bvsms.saude.g
 ## 4. Tablets
 
 | Capability | Lab PC (Chrome/Edge on Windows) | Android tablet (Chrome) | iPad (any browser) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Keyboard-wedge scanner | USB or Bluetooth | Bluetooth HID ([DS2278 guide](https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/ds2278-prg-en.pdf), p. 6-37) | Bluetooth HID (same guide) |
 | Camera + ZXing wasm | yes (webcam) | yes | yes, in a Safari tab ([MDN data](https://github.com/mdn/browser-compat-data/blob/main/api/MediaDevices.json)) |
 | Native `BarcodeDetector` | no (Windows and Linux) | yes, 83+, needs Play Services | behind a flag only |
@@ -307,7 +307,7 @@ Any website the user opens can reach a localhost server.
 ### Existing products
 
 | Product | Shape | Covers | Price | Platforms |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | QZ Tray | (a) localhost WSS | raw and PDF printing, serial, HID, USB | free with prompts; US$749/yr to sign ([store](https://buy.qz.io/Premium-Support-_p_13.html)) | Windows, macOS, Linux |
 | Zebra Browser Print | (a) localhost 9100/9101 | ZPL to Zebra printers | on request ([page](https://www.zebra.com/us/en/support-downloads/software/printer-software/browser-print.html)) | Windows, macOS, Android APK |
 | PrintNode | (b) outbound 443/6123 | raw and PDF printing; "serial and USB weighing scales" ([home](https://www.printnode.com/en)) | free (50 prints, 1 computer); US$9/mo (5,000 prints, 3 computers); US$29; US$99 ([pricing](https://www.printnode.com/en/pricing)) | client on Windows, macOS, Linux; "Mobile devices … not currently supported" |

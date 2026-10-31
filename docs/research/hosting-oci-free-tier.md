@@ -19,7 +19,7 @@ How to read this file:
 ### The allowance
 
 | Resource | Always Free allowance | Source |
-|---|---|---|
+| --- | --- | --- |
 | Arm compute (`VM.Standard.A1.Flex`) | 1,500 OCPU hours and 9,000 GB hours a month, "equivalent to 2 OCPUs and 12 GB of memory", as one instance or two of 1 OCPU each. See [the June 2026 change](#ampere-a1-the-allowance-was-halved-in-june-2026). | [Always Free Resources](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) |
 | AMD compute (`VM.Standard.E2.1.Micro`) | Up to two instances, each "1/8th of an OCPU with the ability to use additional CPU resources", 1 GB of memory, "up to 50 Mbps network bandwidth via the internet" | same page |
 | Block Volume | "a total of 200 GB of Block Volume storage, and five volume backups", counting boot and block volumes together, in the home region only | same page |
@@ -82,6 +82,7 @@ The Always Free page does not mention PostgreSQL ([Always Free Resources](https:
 Oracle's current text ([Always Free Resources](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)):
 
 > Idle Always Free compute instances may be reclaimed by Oracle. Oracle will deem virtual machine and bare metal compute instances as idle if, during a 7-day period, the following are true:
+>
 > - CPU utilization for the 95th percentile is less than 20%
 > - Network utilization is less than 20%
 > - Memory utilization is less than 20% (applies to A1 shapes only)
@@ -218,7 +219,7 @@ What OCI offers inside the free allowance:
 Prices checked on 2026-10-20 at each provider's own source. AmpolaTech needs about 4 GB of memory for a JVM and PostgreSQL together (**analysis**), so that row is the one to compare. OCI's free A1 gives 12 GB.
 
 | Provider | Brazilian region | Smallest plan | 2 GB | 4 GB | Source |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | AWS Lightsail | São Paulo (`sa-east-1`) | US$5/month (0.5 GB) | US$12 | US$24 (2 vCPU, 80 GB SSD) | [regions](https://docs.aws.amazon.com/lightsail/latest/userguide/understanding-regions-and-availability-zones-in-amazon-lightsail.html), [pricing](https://aws.amazon.com/lightsail/pricing/), [price list API, sa-east-1](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/current/sa-east-1/index.json) |
 | Vultr | São Paulo (`sao`) | US$7.50/month (1 vCPU, 1 GB) | US$15 (1 vCPU) | US$30 (2 vCPU, 80 GB) | [regions API](https://api.vultr.com/v2/regions), [plans API](https://api.vultr.com/v2/plans?per_page=500) |
 | Magalu Cloud | São Paulo (`br-se1`) | R$34.99/month (1 vCPU, 1 GB, 10 GB) | R$44.99 (1 vCPU, 10 GB) | R$82.99 (2 vCPU, 10 GB); R$102.99 with 40 GB | [prices](https://magalu.cloud/precos/), [SKU API, br-se1](https://api.magalu.cloud/sku/v0/skus?region=br-se1), [regions](https://docs.magalu.cloud/docs/storage/block-storage/additional-explanations/arquitetura/) |
