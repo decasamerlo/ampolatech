@@ -22,16 +22,16 @@ The verdict covers what markdownlint-cli2's own output can hide: when the linter
 
 ## Fixing findings
 
-1. Run `--fix` at the root. It rewrites what a rule can fix on its own, such as a table's separator row or the blank line before a list:
+1. Run `--fix`. It rewrites what a rule can fix on its own, such as a table's separator row or the blank line before a list:
 
    ```bash
-   mise exec -- sh -c 'PATH=$(dirname "$(mise which node)"):$PATH; exec markdownlint-cli2 --fix'
+   scripts/markdownlint-cli2.sh --fix
    ```
 
-   The inner shell runs it on the pinned Node, as the script does: `mise exec` alone leaves first on `PATH` a Node listed before mise's shims, such as nvm's.
+   Any other run of markdownlint-cli2 goes through that script too, so the linter runs at the pinned version on the pinned Node.
 2. Read the diff it made. It also strips the space at either end of a code span, where the space can be the content, as in the commit prefix `` `build(deps): ` ``; restore that text.
 3. Fix the rest by hand. When the text a rule flags is the content, as with that prefix, the line keeps its text and ends with `<!-- markdownlint-disable-line <rule> -->`. Every other finding is fixed in the text.
-4. Run the script again, until it exits 0.
+4. Run the check again, until it exits 0.
 
 ## What it lints
 
@@ -46,10 +46,10 @@ The rules are markdownlint's defaults, except:
 - **MD024 (duplicate headings) flags only siblings**, so a research note can repeat `### Assessment` under each option.
 - **MD041 (the first line is a heading) is off for `.github/pull_request_template.md` alone**, which opens with the PR's issue line. Every other rule checks it.
 
-**Changing the config.** It names the files as well as the rules, so the script and `--fix` check the same files by the same rules. After a change, read the `Finding:` line the script prints: a misspelt key, such as `ignore` for `ignores`, is skipped without a warning.
+**Changing the config.** It names the files as well as the rules, so the check and `--fix` lint the same files by the same rules. After a change, read the `Finding:` line the check prints: a misspelt key, such as `ignore` for `ignores`, is skipped without a warning.
 
 ## The version is pinned
 
 `mise.toml` pins markdownlint-cli2 and the Node it runs on. `mise.lock` locks Node's downloads by their checksums, and markdownlint-cli2's dependency graph, under `.mise/locks/`. A new version can add a rule or change one, and a file that passed starts failing with nobody having edited it. With the pin, those findings arrive only in the change that moves it.
 
-**To bump either pin**, in a change of its own: edit it in `mise.toml`, run `mise lock` and then the script, fix what the new version finds, and commit the pin, the lock and the fixes together once the script exits 0.
+**To bump either pin**, in a change of its own: edit it in `mise.toml`, run `mise lock` and then the check, fix what the new version finds, and commit the pin, the lock and the fixes together once the check exits 0.

@@ -76,7 +76,7 @@ for ref in $pushed; do
       exit 1
     fi
   fi
-  if printf '%s\n' "$changed" | grep -Eq '\.md$|^\.markdownlint-cli2\.jsonc$|^scripts/lint-docs\.sh$|^mise\.(toml|lock)$'; then
+  if printf '%s\n' "$changed" | grep -Eq '\.md$|^\.markdownlint-cli2\.jsonc$|^scripts/(lint-docs|markdownlint-cli2)\.sh$|^mise\.(toml|lock)$'; then
     export_commit "$sha"
     linted=0
     "$work/$sha/scripts/lint-docs.sh" || linted=$?

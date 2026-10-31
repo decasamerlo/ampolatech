@@ -91,6 +91,9 @@ commit_probe
 branch lint-script
 echo '# probe' >>scripts/lint-docs.sh
 commit_probe
+branch lint-wrapper
+echo '# probe' >>scripts/markdownlint-cli2.sh
+commit_probe
 branch mise-pins
 echo '# probe' >>mise.toml
 commit_probe
@@ -131,6 +134,7 @@ expect "clean Markdown passes the lint" 0 '*lint-docs: ok*' "$(push md-clean)"
 expect "Markdown on a branch without scripts/lint-docs.sh is refused as not linted" 1 '*did not lint*' "$(push md-unlinted)"
 expect "a change to .markdownlint-cli2.jsonc runs the lint" 0 '*lint-docs: ok*' "$(push lint-config)"
 expect "a change to scripts/lint-docs.sh runs the lint" 0 '*lint-docs: ok*' "$(push lint-script)"
+expect "a change to scripts/markdownlint-cli2.sh runs the lint" 0 '*lint-docs: ok*' "$(push lint-wrapper)"
 expect "a change to mise.toml runs the lint" 0 '*lint-docs: ok*' "$(push mise-pins)"
 expect "a push that deletes a branch passes" 0 '' "(delete) $zero refs/heads/gone $(git rev-parse main)"
 expect "a change no check covers passes with nothing printed" 0 '' "$(push unchecked)"
