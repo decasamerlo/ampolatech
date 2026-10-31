@@ -76,7 +76,14 @@ Squash, bottom-up. `gh stack merge <pr> --yes --squash` merges the stack up to a
 
 The repository is private on GitHub's free plan, which allows no ruleset, so GitHub itself doesn't stop a push to `main`. Until it does:
 
-- `.githooks/pre-push` refuses a push to `main`, and checks the commits a push sends that `origin` doesn't have yet. It refuses the push when a commit message breaks a rule `scripts/check-commits.sh` checks (see *Commits*). For each branch whose new commits change `backend/`, it runs `./gradlew spotlessCheck` on that branch's commit, exported from Git, so the checkout and what isn't committed play no part. It refuses the push when the check fails: google-java-format would change the Java, or Gradle didn't run. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
+- `.githooks/pre-push` refuses a push when:
+
+  - it goes to `main`;
+  - a commit `origin` doesn't have yet breaks a rule `scripts/check-commits.sh` checks (see *Commits*);
+  - a branch whose new commits change `backend/` fails `./gradlew spotlessCheck`, since google-java-format would change its Java;
+  - a branch whose new commits change `.githooks/` or `scripts/` fails shellcheck, at the version `mise.toml` pins, over the hook and `scripts/*.sh`.
+
+  A branch's checks run on its commit exported from Git, so the checkout and what isn't committed play no part, and a check whose tool didn't run refuses the push too. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
 - The repository allows squash merge only, taking the commit's title and messages, and deletes a PR's branch once it merges.
 
 Once the repository is public, a ruleset on `main` takes over: a pull request required, squash only, no force-push. It requires no approval. The author can't approve their own PR, and an approval rule would force every layer out of its stack to merge, as it does in nesto.

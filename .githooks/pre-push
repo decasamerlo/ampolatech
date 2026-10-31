@@ -1,14 +1,11 @@
 #!/bin/sh
-# Refuses a push to main: changes reach it only through pull requests
-# (docs/conventions/git.md). Then checks the messages of the commits the
-# push sends that origin doesn't have yet, and runs google-java-format's
-# check on each branch whose new commits change backend/. Turned on per
-# clone with `git config core.hooksPath .githooks`; `git push --no-verify`
-# skips it.
+# Refuses a push in the cases docs/conventions/git.md lists under
+# "Protecting main". Turned on per clone with
+# `git config core.hooksPath .githooks`; `git push --no-verify` skips it.
 set -eu
 
 pushed=""
-while read -r local_ref local_sha remote_ref remote_sha; do
+while read -r local_ref local_sha remote_ref _; do
   if [ "$remote_ref" = "refs/heads/main" ]; then
     echo "pre-push: main takes changes only through pull requests; see docs/conventions/git.md" >&2
     exit 1
@@ -34,13 +31,13 @@ elif [ "$checked" -ne 0 ]; then
   exit 1
 fi
 
-# mise exec runs Gradle on the Java mise.toml pins, also from a Git client
-# that pushes outside a shell where mise is activated.
-gradlew() {
+# mise exec runs a tool at the version mise.toml pins, also from a Git
+# client that pushes outside a shell where mise is activated.
+pinned() {
   if command -v mise >/dev/null 2>&1; then
-    mise exec -- ./gradlew "$@"
+    mise exec -- "$@"
   else
-    ./gradlew "$@"
+    "$@"
   fi
 }
 
@@ -48,21 +45,36 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 trap 'exit 1' HUP INT TERM
 
+# The checks read files, so they run on the pushed commit exported from
+# Git: the working tree holds one branch of the push at most, with what
+# isn't committed yet.
+export_commit() {
+  if [ ! -d "$work/$1" ]; then
+    mkdir "$work/$1"
+    git archive "$1" | tar -x -C "$work/$1"
+  fi
+}
+
 for ref in $pushed; do
-  name=${ref%:*}
+  branch=${ref%:*}
+  branch=${branch#refs/heads/}
   sha=${ref#*:}
+  [ ! -d "$work/$sha" ] || continue # another ref at this commit passed
   changed=$(git rev-list "$sha" --not --remotes=origin |
     while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r "$commit"; done)
-  printf '%s\n' "$changed" | grep -q '^backend/' || continue
-  [ ! -d "$work/$sha" ] || continue # another ref at this commit passed
-  # The check reads files, so it runs on the pushed commit exported from
-  # Git: the working tree holds one branch of the push at most, with what
-  # isn't committed yet.
-  mkdir "$work/$sha"
-  git archive "$sha" | tar -x -C "$work/$sha"
-  if ! (cd "$work/$sha/backend" && gradlew spotlessCheck --quiet); then
-    echo "pre-push: ${name#refs/heads/} fails the format check above; if google-java-format would change its Java, run ./gradlew spotlessApply in backend/ on that branch and amend" >&2
-    exit 1
+  if printf '%s\n' "$changed" | grep -q '^backend/'; then
+    export_commit "$sha"
+    if ! (cd "$work/$sha/backend" && pinned ./gradlew spotlessCheck --quiet); then
+      echo "pre-push: $branch fails the format check above; if google-java-format would change its Java, run ./gradlew spotlessApply in backend/ on that branch and amend" >&2
+      exit 1
+    fi
+  fi
+  if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
+    export_commit "$sha"
+    if ! (cd "$work/$sha" && pinned shellcheck .githooks/* scripts/*.sh); then
+      echo "pre-push: $branch fails shellcheck above; fix what it names on that branch and amend, or run mise install when shellcheck is missing" >&2
+      exit 1
+    fi
   fi
 done
 exit 0
