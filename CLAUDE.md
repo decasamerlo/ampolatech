@@ -12,6 +12,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 
 - **Creating a branch, a commit or a pull request, or building or merging a stack?** The commit message is the only text a squash merge keeps on `main`. See `docs/conventions/git.md`.
 - **Writing or changing a code comment?** A comment outlives the conversation that produced it, and agents read it as instruction. See `docs/conventions/comments.md`.
+- **Writing or changing Markdown, the lint's config or its pin?** Run `scripts/lint-docs.sh` before committing; its verdict, the exit code and the last line, is the whole result. See `docs/conventions/markdown.md`.
 - **Writing or changing Java?** google-java-format fixes the layout, not when `var` fits, the order of members, the shape of a method, or names and imports. See `docs/conventions/java.md`.
 - **Adding or changing a port, an adapter or an application service?** Every port lives in the `domain` module, and a driving port takes the actor as an input. See `docs/conventions/hexagonal.md`.
 - **Writing or changing a test, or behaviour that needs one?** Each behaviour is tested at one seam, the domain types, the HTTP API, the app's start or the web app end to end, and the seam decides what the test may use. See `docs/conventions/testing.md`.

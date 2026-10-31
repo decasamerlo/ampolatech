@@ -71,7 +71,7 @@ The [Multi-Tenant Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheat
 ### Where A, B and C stand in this guidance
 
 | Source | A: explicit in code | B: ORM filter | C: database RLS |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | AWS | Calls it "hoping the correct WHERE clause is implemented in every SQL statement" | Not named; would match its "shared mechanism … outside the view of developers" tenet (analysis) | "Required" for pooled PostgreSQL |
 | Azure | The default ("rely on your application code") | Not discussed | Optional; "complex to design, implement, test, and maintain" |
 | Google (Spanner) | The row pattern itself ("each query must append a predicate") | Not discussed | Not described for Spanner's row pattern; RLS documented for Cloud SQL |
@@ -188,7 +188,7 @@ jOOQ "policies" are "jOOQ's primary way to implement client side row level secur
 ## 4. How frameworks and products do it
 
 | Product or library | Mechanism | What it says about the gaps |
-|---|---|---|
+| --- | --- | --- |
 | [Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security) | C as the primary boundary; clients reach PostgreSQL through its API | "A table in an exposed schema without RLS is readable and writable by any role with a grant on it." The secret key maps to `service_role`, "which has the `bypassrls` attribute." Views bypass RLS unless `security_invoker`. |
 | [Citus](https://docs.citusdata.com/en/stable/use_cases/multi_tenant.html) | Tenant column on every table, used for distribution | "We must ensure all tables have a `company_id` column." "Citus requires that primary and foreign key constraints include the distribution column." RLS on distributed tables is supported "starting in version 11.0", with a role-per-tenant example ([cluster management](https://docs.citusdata.com/en/latest/admin_guide/cluster_management.html)). |
 | [acts_as_tenant](https://github.com/ErwinM/acts_as_tenant/blob/4fa406f723eda249e3584b65693869ea4e1bec0b/README.md?plain=1#L198-L205) (Rails) | B via `default_scope` | Not scoped: "any query when no tenant is set, unless `require_tenant` is enabled", `unscoped`, "raw SQL, such as `find_by_sql`, `connection.execute`", and `update_column(s)`. Offers an RLS hook (see [section 2](#connection-pools)). |
@@ -233,7 +233,7 @@ Everything in this section is analysis, built on the facts above.
 ### The options compared
 
 | Option | What you write | What it stops | What still gets through | How tests prove it |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **A alone** | A `PharmacyId` parameter on every port method, and `pharmacy_id = ?` in every query | Nothing structural; each query must be correct | One forgotten predicate, a wrong id passed down, cross-tenant foreign keys (unless composite) | Per-method tests with a second pharmacy, which are only as complete as the developer who writes them |
 | **B alone** (`@TenantId`) | Mapping plus a resolver backed by a `ThreadLocal` | Forgotten predicates in HQL, Criteria, `find()` and bulk statements | Native SQL, jOOQ, `JdbcTemplate`, `disableFilter`, HQL insert, a misconfigured resolver; tenancy disappears from the port signatures | Hibernate-level tests; nothing covers the SQL Hibernate doesn't generate |
 | **C alone** (RLS) | Policies in every migration, two database roles, a transaction-begin hook, `FORCE` | Forgotten predicates in any SQL the application role runs, native included | Wrong role, missing policy on a new table, a session-scoped setting, constraint channels, SQL injection resetting the setting | Database-level tests through the real role and pool, plus a schema coverage check |
@@ -245,18 +245,21 @@ Everything in this section is analysis, built on the facts above.
 ### What A + C costs in Spring Boot and PostgreSQL
 
 **Schema conventions (every migration):**
+
 - `pharmacy_id uuid not null` on every tenant-owned table.
 - A primary key or unique key on `(pharmacy_id, id)`, and composite foreign keys `(pharmacy_id, <ref>_id) references <ref> (pharmacy_id, id)`. This closes the reference channel that RLS leaves open (A9, A10).
 - Indexes leading with `pharmacy_id`.
 - Truly global tables (shared reference data) are listed as such and granted read-only.
 
 **Two database roles:**
+
 - An owner role that owns the tables and runs Flyway, via `spring.flyway.user`.
 - A runtime role created `NOSUPERUSER NOBYPASSRLS`, with DML grants only.
 - Every tenant table gets `ENABLE` and `FORCE ROW LEVEL SECURITY`, plus a policy `USING (pharmacy_id = current_setting('app.pharmacy_id')::uuid) WITH CHECK (…same…)`. Leaving out `missing_ok` makes an unset tenant an error, not an empty result.
 - If role-specific permissive policies come later, make the tenant policy `AS RESTRICTIVE` so it is always ANDed in.
 
 **The tenant reaching the session:**
+
 - The first statement of every transaction is `select set_config('app.pharmacy_id', ?, true)`, with the value as a bind parameter. Never a session-level `SET`, and never string concatenation.
 - Put it in one transaction-begin hook: a `DataSourceTransactionManager` subclass for JDBC or jOOQ, or a `HibernateJpaDialect` subclass for JPA.
 - Database work outside a transaction then fails, by design. Reads run in `@Transactional(readOnly = true)`.
@@ -267,6 +270,7 @@ Everything in this section is analysis, built on the facts above.
 **Cross-pharmacy work:** platform reports and support tooling run on a separate DataSource and role. That path is explicitly authorized and audited, and never shares the request path (OWASP).
 
 **Tests (Testcontainers):**
+
 - Connect as the runtime role, never the image's superuser.
 - Every repository test sets up two pharmacies. Cross-tenant reads, updates and deletes return nothing, an insert for the other pharmacy is rejected, and a cross-tenant foreign key is rejected.
 - **Prove C without A:** run raw SQL with no tenant predicate under pharmacy A and see only A's rows. With no tenant set, expect an error.
@@ -297,7 +301,7 @@ Health data is "dado pessoal sensível" (Art. 5, II). Art. 46 requires "medidas 
 Run on 2026-10-20: PostgreSQL 18.4 in Docker; tables owned by `owner_role`; an application role `app_role NOSUPERUSER NOBYPASSRLS`. Each tenant table had one policy, `USING (pharmacy_id = current_setting('app.current_pharmacy')::uuid)`. The Hibernate run used Hibernate 7.4.5.Final with `@TenantId` on a `uuid` column, with HikariCP 7.0.2 and PostgreSQL JDBC 42.7.13.
 
 | Id | What was done | Result |
-|---|---|---|
+| --- | --- | --- |
 | T1 | Owner selects, no `FORCE`, no tenant set | Sees both tenants |
 | T2 | `FORCE ROW LEVEL SECURITY`, owner selects | Error without a tenant; one row with tenant A |
 | A1 | App role selects, no tenant set | `unrecognized configuration parameter` (fails closed) |

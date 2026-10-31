@@ -76,5 +76,17 @@ for ref in $pushed; do
       exit 1
     fi
   fi
+  if printf '%s\n' "$changed" | grep -Eq '\.md$|^\.markdownlint-cli2\.jsonc$|^scripts/lint-docs\.sh$|^mise\.(toml|lock)$'; then
+    export_commit "$sha"
+    linted=0
+    "$work/$sha/scripts/lint-docs.sh" || linted=$?
+    if [ "$linted" -eq 1 ]; then
+      echo "pre-push: $branch fails the Markdown lint above; fix what it names on that branch and amend" >&2
+      exit 1
+    elif [ "$linted" -ne 0 ]; then
+      echo "pre-push: scripts/lint-docs.sh did not lint $branch, above; run mise install when a tool is missing, or rebase the branch onto main when it predates the script" >&2
+      exit 1
+    fi
+  fi
 done
 exit 0
