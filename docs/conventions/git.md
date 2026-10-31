@@ -82,7 +82,8 @@ The repository is private on GitHub's free plan, which allows no ruleset, so Git
   - a commit `origin` doesn't have yet breaks a rule `scripts/check-commits.sh` checks (see *Commits*);
   - a branch whose new commits change `backend/` fails `./gradlew spotlessCheck`, since google-java-format would change its Java;
   - a branch whose new commits change `.githooks/` or `scripts/` fails shellcheck, at the version `mise.toml` pins, over the hook and `scripts/*.sh`;
-  - a branch whose new commits change a Markdown file, `.markdownlint-cli2.jsonc`, `scripts/lint-docs.sh`, `mise.toml` or `mise.lock` fails `scripts/lint-docs.sh` (see [markdown.md](markdown.md)).
+  - a branch whose new commits change a Markdown file, `.markdownlint-cli2.jsonc`, `scripts/lint-docs.sh`, `mise.toml` or `mise.lock` fails `scripts/lint-docs.sh` (see [markdown.md](markdown.md));
+  - a branch whose new commits change `.githooks/` or `scripts/test-pre-push.sh` fails `scripts/test-pre-push.sh`, which pushes a fixture branch through the branch's hook for each case in this list. A new check comes with its fixtures there.
 
   A branch's checks run on its commit exported from Git, so the checkout and what isn't committed play no part, and a check whose tool didn't run refuses the push too. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
 - The repository allows squash merge only, taking the commit's title and messages, and deletes a PR's branch once it merges.
