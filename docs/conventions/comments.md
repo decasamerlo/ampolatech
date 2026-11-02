@@ -34,4 +34,4 @@ References that last are welcome where they help: an ADR, a convention in `docs/
 
 ## Inside the hexagon
 
-The domain and application modules depend on no framework, database or transport ([ADR 0002](../adr/0002-stack.md)), and their comments match: they use the glossary's language and name no framework, database, protocol or adapter. A port says what it guarantees; how an adapter meets the guarantee is the adapter's to explain. An adapter's comments may name its own technology and the domain types it converts to and from.
+The domain, the ports and the application services, in the `core` module, depend on no framework, database or transport ([ADR 0002](../adr/0002-stack.md), [ADR 0007](../adr/0007-backend-modules.md)), and their comments match: they use the glossary's language and name no framework, database, protocol or adapter. A port says what it guarantees; how an adapter meets the guarantee is the adapter's to explain. An adapter's comments may name its own technology and the domain types it converts to and from.

@@ -65,6 +65,9 @@ commit_probe
 branch java-formatted
 printf 'final class Probe {}\n' >backend/app/src/main/java/Probe.java
 commit_probe
+branch java-unlayered
+printf 'package dev.ampolatech.adapter.in.web.rest;\n\nimport dev.ampolatech.application.UserApplicationService;\n\nfinal class Probe {\n  private UserApplicationService service;\n}\n' >backend/app/src/main/java/dev/ampolatech/adapter/in/web/rest/Probe.java
+commit_probe
 # shellcheck disable=SC2016 # the fixture script's own $1
 {
   branch script-flagged
@@ -127,6 +130,7 @@ expect "a push to main is refused" 1 '*main takes changes only through pull requ
 expect "a commit message check-commits.sh refuses is refused" 1 '*commit messages above break*' "$(push bad-message)"
 expect "Java google-java-format would change is refused" 1 '*fails the format check*' "$(push java-unformatted)"
 expect "Java google-java-format leaves alone passes" 0 '*' "$(push java-formatted)"
+expect "a web adapter using an application service is refused, its rule and class named" 1 '*the_layers_should_reach_each_other_only_through_the_ports FAILED*Probe.service*fails the architecture test*' "$(push java-unlayered)"
 expect "a script shellcheck flags is refused" 1 '*fails shellcheck*' "$(push script-flagged)"
 expect "a clean script passes" 0 '*' "$(push script-clean)"
 expect "Markdown the lint fails is refused" 1 '*fails the Markdown lint*' "$(push md-failing)"

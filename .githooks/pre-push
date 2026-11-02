@@ -68,6 +68,13 @@ for ref in $pushed; do
       echo "pre-push: $branch fails the format check above; if google-java-format would change its Java, run ./gradlew spotlessApply in backend/ on that branch and amend" >&2
       exit 1
     fi
+    # ArchitectureTest holds the boundaries that the compiler doesn't
+    # (ADR 0007), and unlike the HTTP tests it needs no Docker.
+    # TODO(#10): CI runs it, with every other test.
+    if ! (cd "$work/$sha/backend" && pinned ./gradlew :app:test --tests dev.ampolatech.ArchitectureTest --quiet); then
+      echo "pre-push: $branch fails the architecture test above; move or change the classes it names on that branch and amend" >&2
+      exit 1
+    fi
   fi
   if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"

@@ -1,0 +1,7 @@
+# The local profile's changelog: the schema, then demo data, so a fresh local
+# database is ready to use. Every other profile runs only the master changelog.
+databaseChangeLog:
+  - include:
+      file: db/postgresql/changelog/db.changelog-master.yaml
+  - include:
+      file: db/postgresql/changelog/local/001-seed-demo-pharmacy.sql

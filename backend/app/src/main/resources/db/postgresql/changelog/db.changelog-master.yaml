@@ -1,0 +1,8 @@
+# An include's path is part of each of its changesets' identity, beside the id
+# and the author: a database that ran a changeset under one path runs it again
+# under another.
+databaseChangeLog:
+  - include:
+      file: db/postgresql/changelog/001-create-pharmacy.sql
+  - include:
+      file: db/postgresql/changelog/002-create-app-user.sql
