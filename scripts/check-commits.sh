@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-# Checks each commit it is given against the rules in
-# docs/conventions/git.md that concern a commit message's form. Review
-# checks the rest, from the why in the body to a missing scope.
+# Checks each commit it is given, or a draft message in a file, against
+# the rules in docs/conventions/git.md that concern a commit message's
+# form. Review checks the rest, from the why in the body to a missing
+# scope.
 #
 #   scripts/check-commits.sh <commit>...
+#   scripts/check-commits.sh --message <file>
 #
-# Prints each breach with its commit and exits 1 when there is one. A
-# body longer than 15 lines of text gets a warning that doesn't fail the
-# check.
+# Prints each breach with its commit, or the draft's file, and exits 1
+# when there is one, 2 when it can't read the draft. A body longer than
+# 15 lines of text gets a warning that doesn't fail the check. A draft
+# gets every check but the scope's, which needs the commit's files.
 set -euo pipefail
 # The wrap is counted in characters, which a Git client running without
 # a UTF-8 locale would count in bytes.
@@ -42,14 +45,10 @@ body_part() { # prose | trailers
     }'
 }
 
-for commit in "$@"; do
-  id=$(git rev-parse --short "$commit")
-  subject=$(git show -s --format=%s "$commit")
-  # GitHub appends " (#N)" to the subject when it squash-merges a PR.
-  if git merge-base --is-ancestor "$commit" origin/main 2>/dev/null; then
-    subject=${subject% (#*)}
-  fi
-  body=$(git show -s --format=%b "$commit")
+# Checks $subject, $body and the whole $message under the name $id, and
+# the scope against the changed files of the commit, when it gets one.
+check() { # [commit]
+  local commit=${1:-} prose trailers type scope summary outside lines closing
   prose=$(body_part prose)
   trailers=$(body_part trailers)
 
@@ -68,7 +67,9 @@ for commit in "$@"; do
     if [[ $summary == *. ]]; then
       breach "subject: the summary ends with a period"
     fi
-    if [ -n "$scope" ]; then
+    if [ -n "$scope" ] && [ -z "$commit" ]; then
+      echo "$id: note: the scope ($scope) isn't checked, since a draft has no changed files yet" >&2
+    elif [ -n "$scope" ]; then
       # CLAUDE.md points into every folder, so it goes with any scope.
       outside=$(git diff-tree --root --no-commit-id --name-only -r "$commit" |
         while IFS= read -r file; do
@@ -102,10 +103,47 @@ for commit in "$@"; do
   if ! printf '%s\n' "$trailers" | grep -Eq '^Refs: #[0-9]+'; then
     breach "trailers: no Refs: #N"
   fi
-  closing=$(git show -s --format=%B "$commit" | grep -Eio "$CLOSING_RE" | head -1 || true)
+  closing=$(printf '%s\n' "$message" | grep -Eio "$CLOSING_RE" | head -1 || true)
   if [ -n "$closing" ]; then
     breach "message: \"$closing\" closes an issue, which is the PR body's job; the commit takes Refs: #N"
   fi
+}
+
+if [ "${1:-}" = --message ]; then
+  if [ "$#" -ne 2 ]; then
+    echo "check-commits: --message takes one file and nothing after it" >&2
+    exit 2
+  fi
+  if [ ! -f "$2" ] || [ ! -r "$2" ]; then
+    echo "check-commits: can't read $2 as a file" >&2
+    exit 2
+  fi
+  id=$2
+  # git stripspace cleans the draft as git commit -F does: it drops
+  # leading and trailing blank lines, trailing spaces and carriage
+  # returns, and runs of blank lines. Then, as git splits a message, the
+  # first paragraph is the subject, on one line, and the rest the body.
+  message=$(git stripspace <"$2")
+  subject=${message%%$'\n\n'*}
+  subject=${subject//$'\n'/ }
+  body=""
+  if [[ $message == *$'\n\n'* ]]; then
+    body=$(printf '%s\n' "${message#*$'\n\n'}" | sed '/./,$!d')
+  fi
+  check # a draft has no commit, so no changed files for the scope
+  exit "$status"
+fi
+
+for commit in "$@"; do
+  id=$(git rev-parse --short "$commit")
+  subject=$(git show -s --format=%s "$commit")
+  # GitHub appends " (#N)" to the subject when it squash-merges a PR.
+  if git merge-base --is-ancestor "$commit" origin/main 2>/dev/null; then
+    subject=${subject% (#*)}
+  fi
+  body=$(git show -s --format=%b "$commit")
+  message=$(git show -s --format=%B "$commit")
+  check "$commit"
 done
 
 exit "$status"
