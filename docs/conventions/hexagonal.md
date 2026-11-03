@@ -12,9 +12,26 @@ Where the backend's code lives, how its ports are named, and who implements them
 - **An adapter's package is `adapter.{in,out}.{category}.{implementation}`**: its direction, what it does, and which one it is, such as `adapter.in.web.rest`, `adapter.in.signin.demo` and `adapter.out.persistence.postgresql`. The implementation is written even when it is the only one, so a second never moves the first.
 - **The Liquibase changelogs live in `app`'s resources, under `db/postgresql/changelog/`.** The path names the database, not an adapter, because every adapter that uses PostgreSQL shares its schema.
 - **An adapter reaches the application through a port alone.** Only the composition root, which builds the application services, reaches a service or an adapter.
+
+### Writing `ArchitectureTest`'s rules
+
 - **A new adapter category gets its own layer and allow-list in `ArchitectureTest`**, in the change that adds it. Every class must sit in a layer, so the test fails until then.
 - **An allow-list names the packages its classes use, one by one, and grows a package at a time**, in the change that needs it, where review sees it, never by a root such as `org.springframework..`. Only the repository's own packages and the JDK's `java.lang`, `java.util`, `java.time` and `java.math` take the `..` that covers the packages below them: a root lets in more than one technology, as `java..` holds `java.sql` and `org.springframework.boot..` holds Boot's JDBC and web support alike.
 - **The domain, the ports and the services share one allow-list**, of `core`'s packages and those four of the JDK. Every module compiles against the whole JDK, so it is this list, not `core`'s classpath, that stops them from using `java.sql` or `java.net.http`.
+- **A new or changed rule goes red before it lands**, since a rule passes on clean code whether or not it catches anything. An allow-list growing by a package is left to review, as above.
+
+  1. In a production package the rule covers, add a class that breaks what the change adds; `ArchitectureTest` leaves the test sources out.
+  2. In `backend/`, run `./gradlew :app:test --tests dev.ampolatech.ArchitectureTest`: the rule fails, naming the class, and any other rule that fails names the same dependency.
+  3. Delete the class, and show the run in the PR's Evidence.
+
+  One line per rule, with the break that turns it red; a new rule adds its own, and a changed rule updates it:
+
+  - the layers: a domain type holding a driven port;
+  - the allow-list of the domain, the ports and the services: a domain type holding a `java.sql.Connection`;
+  - the ports: a driven port written as an abstract class;
+  - the web adapters' allow-list: a web adapter holding a `java.sql.Connection`;
+  - the sign-in adapters' allow-list: a sign-in adapter holding Boot's `DataSourceBuilder`;
+  - the persistence adapters' allow-list: a persistence adapter holding an `HttpServletRequest`.
 
 ## Ports
 
