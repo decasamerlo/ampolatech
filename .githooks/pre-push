@@ -55,6 +55,39 @@ export_commit() {
   fi
 }
 
+log="$work/gradle.log"
+
+# Runs Gradle in an exported commit's backend/, its output in $log.
+gradle_on() { # commit gradle-argument...
+  (
+    cd "$work/$1/backend"
+    shift
+    pinned ./gradlew "$@" --quiet
+  ) >"$log" 2>&1
+}
+
+# Refuses the push after a failed Gradle run, with the refusal of the
+# first pattern that matches a line Gradle printed in $log. Gradle also
+# fails before a check runs, on a build it can't configure, Java that
+# doesn't compile or a daemon gone wrong, so a run that matches none
+# says so rather than naming the check. The patterns match Gradle's own
+# "> …" lines: javac repeats the source line it can't compile, and that
+# line can hold any text.
+refuse_after_gradle() { # branch check [pattern refusal]...
+  cat "$log" >&2
+  refused=$1 check=$2
+  shift 2
+  while [ "$#" -ge 2 ]; do
+    if grep -Eq "$1" "$log"; then
+      echo "pre-push: $refused $2" >&2
+      exit 1
+    fi
+    shift 2
+  done
+  echo "pre-push: Gradle stopped on $refused before it ran $check, above; fix what it names on that branch and amend, or, when a commit that passed before fails the same way, run ./gradlew --stop in backend/ and push again" >&2
+  exit 1
+}
+
 for ref in $pushed; do
   branch=${ref%:*}
   branch=${branch#refs/heads/}
@@ -64,17 +97,19 @@ for ref in $pushed; do
     while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r "$commit"; done)
   if printf '%s\n' "$changed" | grep -q '^backend/'; then
     export_commit "$sha"
-    if ! (cd "$work/$sha/backend" && pinned ./gradlew spotlessCheck --quiet); then
-      echo "pre-push: $branch fails the format check above; if google-java-format would change its Java, run ./gradlew spotlessApply in backend/ on that branch and amend" >&2
-      exit 1
-    fi
+    gradle_on "$sha" spotlessCheck ||
+      refuse_after_gradle "$branch" "the format check" \
+        '^> The following files had format violations' \
+        "fails the format check above; run ./gradlew spotlessApply in backend/ on that branch and amend" \
+        '^> There were [0-9]+ lint error' \
+        "fails the format check above: google-java-format can't parse the Java it names; fix that Java on the branch and amend"
     # ArchitectureTest holds the boundaries that the compiler doesn't
     # (ADR 0007), and unlike the HTTP tests it needs no Docker.
     # TODO(#10): CI runs it, with every other test.
-    if ! (cd "$work/$sha/backend" && pinned ./gradlew :app:test --tests dev.ampolatech.ArchitectureTest --quiet); then
-      echo "pre-push: $branch fails the architecture test above; move or change the classes it names on that branch and amend" >&2
-      exit 1
-    fi
+    gradle_on "$sha" :app:test --tests dev.ampolatech.ArchitectureTest ||
+      refuse_after_gradle "$branch" "the architecture test" \
+        '^> There were failing tests' \
+        "fails the architecture test above; move or change the classes it names on that branch and amend"
   fi
   if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"
