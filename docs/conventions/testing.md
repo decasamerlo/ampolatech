@@ -6,10 +6,12 @@ Which seam a test goes through, and what a test at each seam may use. No checker
 
 A seam is where a test meets the code: what it calls, and what it treats as the outside world. Each behaviour is tested at one seam.
 
-- **The domain types**, for a rule a domain type enforces: a value it refuses, a value it derives, a change it allows. The test calls the type's constructors and methods in the `domain` module, with JUnit and AssertJ alone. `domain` depends on nothing ([ADR 0002](../adr/0002-stack.md)), so a test that needs anything more is testing something other than the domain.
+- **The domain types**, for a rule a domain type enforces: a value it refuses, a value it derives, a change it allows. The test calls the type's constructors and methods in the `core` module, with JUnit and AssertJ alone. `core` depends on nothing ([ADR 0007](../adr/0007-backend-modules.md)), so a test that needs anything more is testing something other than the domain. `core` also holds the application services, and its tests are still the domain types' alone: a service is tested at the HTTP API.
 - **The HTTP API**, for behaviour that crosses layers: what a client sees, what is stored, who is signed in, and the pharmacy filter of [ADR 0003](../adr/0003-one-instance-for-all-pharmacies.md). Application services and driving adapters are tested here too (below). The test starts the app against PostgreSQL in Testcontainers, with every module real, and calls it only over HTTP. #2's *Testing Decisions* list what it covers in the first slice.
 - **The app's start**, for a check that refuses to start the app, which no HTTP call can reach. The test calls `SpringApplication.run` with the profiles and properties under test and checks that the start fails, as `DemoSignInGuardTest` does.
 - **The web app end to end**, for a few journeys in a browser against the real backend, as #2's *Testing Decisions* describe.
+
+`ArchitectureTest`, in `app`, sits outside the four: it checks the backend's layout, where code lives and what it may use ([hexagonal.md](hexagonal.md)), not a behaviour.
 
 ## Domain unit tests
 

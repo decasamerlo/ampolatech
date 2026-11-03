@@ -1,0 +1,26 @@
+# Two backend modules, core and app, with ArchUnit guarding what the compiler can't
+
+The backend has two Gradle modules, as nesto's [ADR 014](https://github.com/decasamerlo/nesto/blob/main/docs/adr/014-backend-module-layout.md) gave nesto's:
+
+- **`core`** holds the domain, the ports and the application services, in `dev.ampolatech.domain`, `port.in`, `port.out` and `application`. It depends on no module, and its compile classpath holds no library at all.
+- **`app`** holds every adapter, the composition root and the Spring Boot application, and depends on `core` alone.
+
+An adapter's package is `adapter.{in,out}.{category}.{implementation}`: its direction, what it does, and which one it is, such as `adapter.in.web.rest` or `adapter.out.persistence.postgresql`. With every adapter in one module, a path names the category once. This replaces a module per layer (`domain`, `application`, `persistence`, `rest` and `app`), where `domain` also held the ports, and an adapter module's name either repeated the category its package carried or named the implementation instead, as `rest` did.
+
+**What stays with the compiler.** No library reaches the domain, the ports or the application services: `core`'s classpath has none to import. `core` depends on no module, so nothing in it reaches an adapter or the composition root. The compiler lets them use the whole JDK, though, `java.sql` and `java.net.http` among it, as the module per layer did.
+
+**What moves to ArchUnit.** The module per layer kept the domain and the ports from the application services, the adapters from the services and from each other, and each adapter from the others' technology, since a module's classpath is an allow-list. In `core` the domain sits beside the services, and in `app` every adapter compiles against every library, so those boundaries are rules in `app`'s `ArchitectureTest`, on `com.tngtech.archunit:archunit-junit6`, the artifact for JUnit 6:
+
+- **The layers**, as one `layeredArchitecture()`. The domain reaches no port, application service or adapter, and only the composition root, the package `dev.ampolatech` alone, reaches an application service or an adapter. An adapter reaches the application through a driving port, and no adapter reaches another.
+- **Every class in a layer, and no layer empty.** ArchUnit fails a rule whose `that()` selects no class ([user guide](https://github.com/TNG/ArchUnit/blob/main/docs/userguide/010_Advanced_Configuration.adoc)), never one whose target is empty, so a rule that forbids a dependency on `dev.ampolatech.application..` still passes once that package is renamed. With every class required to sit in a layer, a renamed package fails the test, and so does a new adapter category until it gets its own layer, and so does an adapter package that names no implementation.
+- **An allow-list for each adapter category** (`onlyDependOnClassesThat()`), in place of its module's classpath, since a deny-list lets through whatever it forgets to name. Each list names packages one by one, as [hexagonal.md](../conventions/hexagonal.md) says, because a root lets in more than one technology: `java..` holds `java.sql`, and `org.springframework.boot..` holds Boot's JDBC, JPA and web MVC support alike. The driving adapters list no driven port, so a driving adapter reaches the database or a driven port only through the application.
+- **An allow-list for the domain, the ports and the services**, of `core`'s packages and the JDK packages the adapters' lists name. The module per layer had none, and the guarantee [ADR 0002](0002-stack.md) names, no framework or database in them, needs one: it refuses `java.sql`, JDBC's API, which compiles in `core`.
+
+A broken boundary shows at test time, not at compile time: the code compiles, and `./gradlew build` fails on `app`'s tests. No CI runs the tests yet (#10), so `.githooks/pre-push` runs `ArchitectureTest`, which needs no database, on a push that changes `backend/`.
+
+## Considered options
+
+- **One module**, as [buckpal](https://github.com/thombergs/buckpal) has. It saves a build file and puts every boundary in tests, which hold only when they run. With `core` apart, the domain's freedom from frameworks stays a fact of the classpath.
+- **A module per adapter category**, as before. Each adapter's technology would stay apart at compile time, which ArchUnit's [user guide](https://github.com/TNG/ArchUnit/blob/main/docs/userguide/008_The_Library_API.adoc) counts in a module system's favour. But a package inside such a module either repeats its category or drops it, and nesto had already dropped it, splitting one port's two implementations between `adapter.out.persistence` and `adapter.out.postgresql` (its ADR 014). It also adds a module per category. The allow-lists keep the same boundaries, at test time.
+- **An `application` module beside `core`.** The composition root lives in `app` and builds the application services, so `app` sees them either way, and the compiler can't stop an adapter there from reaching one. The layered rule has to guard that whether the module exists or not.
+- **The composition root in a module of its own**, apart from the adapters. It lets one deployable host several bounded contexts. This repository has one context and one deployable, so the split would buy nothing yet.

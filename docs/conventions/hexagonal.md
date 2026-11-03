@@ -1,10 +1,24 @@
 # Hexagonal architecture
 
-Where the backend's ports live, how they are named, and who implements them. The backend is hexagonal ([ADR 0002](../adr/0002-stack.md)): `domain` and `application` depend on no framework, and adapters reach them only through ports. Beyond what the Gradle modules forbid, no checker enforces these rules: review does.
+Where the backend's code lives, how its ports are named, and who implements them. The backend is hexagonal ([ADR 0002](../adr/0002-stack.md)): the domain, the ports and the application services depend on no framework, and adapters reach them only through ports. The compiler and `ArchitectureTest` enforce where code lives and what it may use ([ADR 0007](../adr/0007-backend-modules.md)), and `ArchitectureTest` that a port is an interface; review enforces the rest, the names among them.
+
+## Modules and packages
+
+| Module | Packages, under `dev.ampolatech` | Depends on |
+| --- | --- | --- |
+| `core` | `domain`, `port.in`, `port.out`, `application` | No module and no library |
+| `app` | the composition root, in the package `dev.ampolatech` itself, and the adapters, in `adapter..` | `core` and the libraries the adapters use |
+
+- **An adapter's package is `adapter.{in,out}.{category}.{implementation}`**: its direction, what it does, and which one it is, such as `adapter.in.web.rest`, `adapter.in.signin.demo` and `adapter.out.persistence.postgresql`. The implementation is written even when it is the only one, so a second never moves the first.
+- **The Liquibase changelogs live in `app`'s resources, under `db/postgresql/changelog/`.** The path names the database, not an adapter, because every adapter that uses PostgreSQL shares its schema.
+- **An adapter reaches the application through a port alone.** Only the composition root, which builds the application services, reaches a service or an adapter.
+- **A new adapter category gets its own layer and allow-list in `ArchitectureTest`**, in the change that adds it. Every class must sit in a layer, so the test fails until then.
+- **An allow-list names the packages its classes use, one by one, and grows a package at a time**, in the change that needs it, where review sees it, never by a root such as `org.springframework..`. Only the repository's own packages and the JDK's `java.lang`, `java.util`, `java.time` and `java.math` take the `..` that covers the packages below them: a root lets in more than one technology, as `java..` holds `java.sql` and `org.springframework.boot..` holds Boot's JDBC and web support alike.
+- **The domain, the ports and the services share one allow-list**, of `core`'s packages and those four of the JDK. Every module compiles against the whole JDK, so it is this list, not `core`'s classpath, that stops them from using `java.sql` or `java.net.http`.
 
 ## Ports
 
-A port is an interface the application owns. Both kinds sit in the `domain` module: a driving port in `port.in`, a driven port in `port.out`. A module of adapters depends on `domain` alone, so the compiler keeps its adapters from reaching an application service, which sits in `application`. Only the composition root, the `app` module, sees every other module, and review holds an adapter placed there to the same rule.
+A port is an interface the application owns, in `core`: a driving port in `port.in`, a driven port in `port.out`. Every top-level type in `port..` is an interface, which `ArchitectureTest` checks; a port's `Command` and `Result` nest inside it. A driving adapter calls a driving port, and a driven adapter implements a driven port, so a request reaches the database or another system only through the application. A driving adapter's allow-list names the driving ports alone.
 
 ### Driving ports
 
@@ -34,12 +48,13 @@ A method's prefix says what absence means, in driving and driven ports alike:
 
 ### Who implements a driving port
 
-**The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in the `application` module: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `application`, it depends on no framework, so it carries no annotation and the composition root builds it.
+**The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in `core`'s `application` package: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `core`, it depends on no framework, so it carries no annotation and the composition root builds it.
 
 ## Sources
 
 - Alistair Cockburn, [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/): the application talks to the outside only through ports, which adapters call or implement.
 - Tom Hombergs, *Get Your Hands Dirty on Clean Architecture*, and its example code, [buckpal](https://github.com/thombergs/buckpal): one interface per operation in `port.in`, taking a command for a write and a query for a read. buckpal has a service per operation; this repository keeps one per aggregate.
+- nesto's [ADR 014](https://github.com/decasamerlo/nesto/blob/main/docs/adr/014-backend-module-layout.md): the same two modules, and the adapter package format.
 - [nesto#19](https://github.com/decasamerlo/nesto/issues/19), which proposes the same pairing for nesto: an application service per aggregate, with an interface per operation.
 - Martin Fowler, [CommandQuerySeparation](https://martinfowler.com/bliki/CommandQuerySeparation.html): why a read and a write are named apart.
 - Joshua Bloch, *Effective Java*, 3rd edition, item 54, "Return empty collections or arrays, not nulls": why a `list…` answers absence with an empty `List`.

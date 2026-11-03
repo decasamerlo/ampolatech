@@ -4,18 +4,20 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":application"))
-    implementation(project(":persistence"))
-    implementation(project(":rest"))
+    implementation(project(":core"))
 
     implementation(platform(libs.spring.boot.dependencies))
-    implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.liquibase)
+    runtimeOnly(libs.postgresql)
 
     testImplementation(platform(libs.spring.boot.dependencies))
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.boot.resttestclient)
     testImplementation(libs.spring.jdbc)
     testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.archunit.junit6)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

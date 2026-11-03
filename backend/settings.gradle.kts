@@ -15,8 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ampolatech-backend"
 
-include(":domain")
-include(":application")
-include(":persistence")
-include(":rest")
+include(":core")
 include(":app")

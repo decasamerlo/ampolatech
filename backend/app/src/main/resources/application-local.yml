@@ -6,9 +6,9 @@ spring:
     url: jdbc:postgresql://localhost:${AMPOLATECH_POSTGRES_PORT:5432}/ampolatech
     password: app-local
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-local.yaml
+    change-log: classpath:db/postgresql/changelog/db.changelog-local.yaml
     password: owner-local
-    # The demo seed (db/changelog/local/) inserts the demo user from these.
+    # The demo seed (db/postgresql/changelog/local/) inserts the demo user from these.
     parameters:
       demo-user-id: ${ampolatech.sign-in.demo.user-id}
       demo-pharmacy-id: ${ampolatech.sign-in.demo.pharmacy-id}

@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
     `java-library`
     id("com.diffplug.spotless")
@@ -11,14 +14,18 @@ java {
     }
 }
 
-// Spring reads method parameter names through reflection, which needs -parameters. Spring Boot's
-// plugin adds the flag only to the module that applies it, so every module gets it here.
-tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-parameters")
-}
-
+// A failed test prints its whole message, such as the classes that break an ArchitectureTest rule,
+// under --quiet too: .githooks/pre-push runs the tests quietly, in an export of the commit that it
+// deletes with the test report.
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        quiet {
+            events(TestLogEvent.FAILED)
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
 }
 
 val catalog = the<VersionCatalogsExtension>().named("libs")
