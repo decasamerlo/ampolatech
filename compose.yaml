@@ -33,9 +33,17 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ampolatech
-    # Only this machine: the demo sign-in signs in whoever connects.
+    # Only this machine: the demo sign-in signs in whoever connects. Set
+    # AMPOLATECH_BACKEND_PORT when another process holds 8080.
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${AMPOLATECH_BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      # The runtime image has bash but neither curl nor wget. A connection
+      # means ready: the app opens its port only after Liquibase has run.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
     depends_on:
       postgres:
         condition: service_healthy
