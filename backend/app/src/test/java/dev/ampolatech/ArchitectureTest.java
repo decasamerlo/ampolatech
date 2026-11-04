@@ -106,6 +106,7 @@ class ArchitectureTest {
               "org.jspecify.annotations",
               "org.slf4j",
               "org.springframework.http",
+              "org.springframework.stereotype",
               "org.springframework.web.bind.annotation",
               "org.springframework.web.context.request",
               "org.springframework.web.servlet.mvc.method.annotation");

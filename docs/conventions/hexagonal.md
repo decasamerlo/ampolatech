@@ -12,6 +12,7 @@ Where the backend's code lives, how its ports are named, and who implements them
 - **An adapter's package is `adapter.{in,out}.{category}.{implementation}`**: its direction, what it does, and which one it is, such as `adapter.in.web.rest`, `adapter.in.signin.demo` and `adapter.out.persistence.postgresql`. The implementation is written even when it is the only one, so a second never moves the first.
 - **The Liquibase changelogs live in `app`'s resources, under `db/postgresql/changelog/`.** The path names the database, not an adapter, because every adapter that uses PostgreSQL shares its schema.
 - **An adapter reaches the application through a port alone.** Only the composition root, which builds the application services, reaches a service or an adapter.
+- **An adapter turns an aggregate into its own model, or back, in that aggregate's mapper beside it, `{Aggregate}{Category}Mapper`**: `UserPersistenceMapper` turns a `UserEntity` into a `User`, and `PharmacyWebMapper` a `Pharmacy` into a `PharmacyDto`. The mapper is a `@Component` the adapter takes in its constructor, and one whose model holds another aggregate's takes that aggregate's mapper, as `UserWebMapper` takes `PharmacyWebMapper`. Each adapter's conversions then sit in the same kind of place, and a second class that needs one calls it rather than copying it.
 
 ### Writing `ArchitectureTest`'s rules
 
