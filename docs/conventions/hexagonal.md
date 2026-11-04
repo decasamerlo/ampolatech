@@ -17,6 +17,7 @@ Where the backend's code lives, how its ports are named, and who implements them
 
 - **A new adapter category gets its own layer and allow-list in `ArchitectureTest`**, in the change that adds it. Every class must sit in a layer, so the test fails until then.
 - **An allow-list names the packages its classes use, one by one, and grows a package at a time**, in the change that needs it, where review sees it, never by a root such as `org.springframework..`. Only the repository's own packages and the JDK's `java.lang`, `java.util`, `java.time` and `java.math` take the `..` that covers the packages below them: a root lets in more than one technology, as `java..` holds `java.sql` and `org.springframework.boot..` holds Boot's JDBC and web support alike.
+- **`scripts/architecture-violations.sh` reads a failed run's report**: for each rule that failed, every package its violations reach, with the classes that reach it, one line per package, so a package an allow-list lacks reads at a glance.
 - **The domain, the ports and the services share one allow-list**, of `core`'s packages and those four of the JDK. Every module compiles against the whole JDK, so it is this list, not `core`'s classpath, that stops them from using `java.sql` or `java.net.http`.
 - **A new or changed rule goes red before it lands**, since a rule passes on clean code whether or not it catches anything. An allow-list growing by a package is left to review, as above.
 
