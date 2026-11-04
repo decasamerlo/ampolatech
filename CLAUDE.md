@@ -44,6 +44,8 @@ AmpolaTech will be public; some codebases it draws precedent from are not. Adapt
 
 Issues live in GitHub Issues on `decasamerlo/ampolatech`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
+**Asked whether the repo uses a tool or a pattern, or recommending one?** The answer may be an issue titled `Decide …`: open while the decision is pending, closed once it is made. Search the issues before the code: `gh issue list --state all --search '<term>'`.
+
 ### Triage labels
 
 The five default labels, each named after its role: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
