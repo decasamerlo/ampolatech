@@ -8,9 +8,10 @@
 #   scripts/check-commits.sh --message <file>
 #
 # Prints each breach with its commit, or the draft's file, and exits 1
-# when there is one, 2 when it can't read the draft. A body longer than
-# 15 lines of text gets a warning that doesn't fail the check. A draft
-# gets every check but the scope's, which needs the commit's files.
+# when there is one, 2 when it is given nothing to check or can't read
+# the draft. A body longer than 15 lines of text gets a warning that
+# doesn't fail the check. A draft gets every check but the scope's,
+# which needs the commit's files.
 set -euo pipefail
 # The wrap is counted in characters, which a Git client running without
 # a UTF-8 locale would count in bytes.
@@ -109,7 +110,12 @@ check() { # [commit]
   fi
 }
 
-if [ "${1:-}" = --message ]; then
+if [ "$#" -eq 0 ]; then
+  echo "check-commits: name the commits to check, such as HEAD, or a draft with --message <file>" >&2
+  exit 2
+fi
+
+if [ "$1" = --message ]; then
   if [ "$#" -ne 2 ]; then
     echo "check-commits: --message takes one file and nothing after it" >&2
     exit 2
