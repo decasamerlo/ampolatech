@@ -16,6 +16,8 @@ docker compose up --build
 
 It builds the backend's image from the repository root, since the build reads `api/openapi.yaml`. It starts PostgreSQL and the backend under the `local` profile, on <http://localhost:8080>, and seeds a demo pharmacy and its sales agent (`db/postgresql/changelog/db.changelog-local.yaml`). `curl localhost:8080/api/me` answers with that agent, whom the demo sign-in signs everyone in as.
 
+`docker compose up --build --wait` starts the same stack in the background and returns once the backend accepts connections, so a request sent right after it gets an answer; `docker compose down` stops it. When another process holds the backend's 8080 or PostgreSQL's 5432, set `AMPOLATECH_BACKEND_PORT` or `AMPOLATECH_POSTGRES_PORT` to a free port in your shell.
+
 The `local` profile is the only one that runs on a machine: the others take the database from the environment, and nothing in them signs anyone in. To run the backend outside Docker, start only the database and run the app under that profile:
 
 ```bash
@@ -24,7 +26,7 @@ cd backend
 SPRING_PROFILES_ACTIVE=local ./gradlew :app:bootRun
 ```
 
-Compose publishes PostgreSQL on `127.0.0.1:5432`, and the local profile connects there. When another database holds that port, set `AMPOLATECH_POSTGRES_PORT` to a free one in your shell: both Compose and the local profile read it.
+The local profile connects to PostgreSQL on the port Compose publishes it on, since both read `AMPOLATECH_POSTGRES_PORT`.
 
 When a changeset that already ran on your local database changes, Liquibase refuses to start on it; when it moves to another path, Liquibase runs it again, and fails. `docker compose down -v` deletes the database's volume, and the next start creates it afresh.
 
