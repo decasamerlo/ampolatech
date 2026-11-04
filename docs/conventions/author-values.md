@@ -60,7 +60,8 @@ An agent takes the more correct option without stopping when the values settle t
 
 - the cost falls on someone else;
 - the options are close on the values;
-- the choice is hard to reverse, the kind an ADR records.
+- the choice is hard to reverse, the kind an ADR records;
+- the choice is a name or a shape a client sees and the issue leaves it open, such as a schema in the API's spec ([api.md](api.md)).
 
 ## In review
 
