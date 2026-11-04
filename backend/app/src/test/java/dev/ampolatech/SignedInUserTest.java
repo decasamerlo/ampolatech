@@ -1,11 +1,10 @@
 package dev.ampolatech;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import dev.ampolatech.domain.Actor;
 import dev.ampolatech.domain.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec;
 
@@ -77,8 +76,12 @@ class SignedInUserTest extends HttpSeamTest {
 
     response
         .expectStatus()
-        .is5xxServerError()
-        .expectBody(String.class)
-        .value(body -> assertThat(body).doesNotContain("Carlos Souza"));
+        .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        .expectBody()
+        .json(
+            """
+            {"title": "Internal Server Error", "status": 500}
+            """,
+            JsonCompareMode.STRICT);
   }
 }

@@ -79,6 +79,14 @@ commit_probe
 branch java-unlayered
 printf 'package dev.ampolatech.adapter.in.web.rest;\n\nimport dev.ampolatech.application.UserApplicationService;\n\nfinal class Probe {\n  private UserApplicationService service;\n}\n' >backend/app/src/main/java/dev/ampolatech/adapter/in/web/rest/Probe.java
 commit_probe
+branch spec-unimplemented
+{
+  sed -n '1,/^paths:$/p' api/openapi.yaml
+  printf '  /api/probe:\n    get:\n      operationId: getProbe\n      tags: [users]\n      responses:\n        "204":\n          description: The probe.\n'
+  sed '1,/^paths:$/d' api/openapi.yaml
+} >api/probe.yaml
+mv api/probe.yaml api/openapi.yaml
+commit_probe
 # shellcheck disable=SC2016 # the fixture script's own $1
 {
   branch script-flagged
@@ -145,6 +153,7 @@ expect "a build Gradle can't configure is refused as not format-checked" 1 '*Gra
 expect "Java google-java-format can't parse is refused, the parse named" 1 '*fails the format check above: google-java-format can*t parse*' "$(push java-unparseable)"
 expect "Java that doesn't compile is refused as not tested" 1 '*Gradle stopped on java-uncompilable before it ran the architecture test*' "$(push java-uncompilable)"
 expect "a web adapter using an application service is refused, its rule and class named" 1 '*the_layers_should_reach_each_other_only_through_the_ports FAILED*Probe.service*fails the architecture test*' "$(push java-unlayered)"
+expect "an operation the spec adds and no controller implements is refused as not tested" 1 '*does not override abstract method getProbe*Gradle stopped on spec-unimplemented before it ran the architecture test*' "$(push spec-unimplemented)"
 expect "a script shellcheck flags is refused" 1 '*fails shellcheck*' "$(push script-flagged)"
 expect "a clean script passes" 0 '*' "$(push script-clean)"
 expect "Markdown the lint fails is refused" 1 '*fails the Markdown lint*' "$(push md-failing)"

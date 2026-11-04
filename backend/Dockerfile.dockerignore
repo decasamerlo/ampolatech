@@ -1,0 +1,11 @@
+# The image builds from the repository root and needs only api/ and
+# backend/, without the build output or the Docker files themselves.
+*
+!api/
+!backend/
+backend/**/.gradle
+backend/**/.kotlin
+backend/**/build
+backend/**/bin
+backend/Dockerfile
+backend/Dockerfile.dockerignore

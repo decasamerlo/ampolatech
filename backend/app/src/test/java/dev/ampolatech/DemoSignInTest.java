@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 @ActiveProfiles("local")
-@Import(TestData.class)
+@Import({TestData.class, ApiSpecValidation.class})
 @DisplayName("The demo sign-in")
 class DemoSignInTest {
 

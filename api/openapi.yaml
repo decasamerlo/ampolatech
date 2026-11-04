@@ -1,0 +1,78 @@
+openapi: 3.1.2
+info:
+  title: AmpolaTech
+  version: 0.1.0
+tags:
+  - name: users
+    description: The users of a pharmacy.
+paths:
+  /api/me:
+    get:
+      operationId: getSignedInUser
+      summary: The signed-in user
+      tags: [users]
+      responses:
+        "200":
+          description: The signed-in user, with their role and the pharmacy they work for.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedInUser"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  responses:
+    InternalServerError:
+      description: An error the server didn't expect.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    SignedInUser:
+      type: object
+      required: [name, role, pharmacy]
+      properties:
+        name:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        pharmacy:
+          $ref: "#/components/schemas/Pharmacy"
+    Role:
+      description: What a user may do in their pharmacy.
+      type: string
+      enum: [PHARMACIST, SALES_AGENT]
+    Pharmacy:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+    # RFC 9457's problem details, after its Appendix A, written flat: the
+    # response validator rejects a valid body composed with allOf on 3.1.
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type:
+          description: >-
+            A URI reference that identifies the problem type. When absent,
+            the type is "about:blank".
+          type: string
+          format: uri-reference
+        title:
+          description: A short, human-readable summary of the problem type.
+          type: string
+        status:
+          description: The HTTP status code of this occurrence of the problem.
+          type: integer
+          minimum: 100
+          maximum: 599
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          type: string
+        instance:
+          description: A URI reference that identifies this occurrence of the problem.
+          type: string
+          format: uri-reference

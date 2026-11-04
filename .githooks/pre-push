@@ -95,7 +95,9 @@ for ref in $pushed; do
   [ ! -d "$work/$sha" ] || continue # another ref at this commit passed
   changed=$(git rev-list "$sha" --not --remotes=origin |
     while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r "$commit"; done)
-  if printf '%s\n' "$changed" | grep -q '^backend/'; then
+  # The backend's build generates its web adapter from api/openapi.yaml,
+  # so a change to the spec alone can break the backend's compile.
+  if printf '%s\n' "$changed" | grep -Eq '^(api|backend)/'; then
     export_commit "$sha"
     gradle_on "$sha" spotlessCheck ||
       refuse_after_gradle "$branch" "the format check" \

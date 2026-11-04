@@ -96,10 +96,19 @@ class ArchitectureTest {
               "java.util..",
               "java.time..",
               "java.math..",
+              "java.net",
               "dev.ampolatech.domain..",
               "dev.ampolatech.port.in..",
               "dev.ampolatech.adapter.in.web..",
-              "org.springframework.web.bind.annotation");
+              "com.fasterxml.jackson.annotation",
+              "jakarta.validation",
+              "jakarta.validation.constraints",
+              "org.jspecify.annotations",
+              "org.slf4j",
+              "org.springframework.http",
+              "org.springframework.web.bind.annotation",
+              "org.springframework.web.context.request",
+              "org.springframework.web.servlet.mvc.method.annotation");
 
   @ArchTest
   static final ArchRule sign_in_adapters_should_use_only_their_allowed_packages =
