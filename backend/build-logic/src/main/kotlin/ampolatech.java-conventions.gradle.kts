@@ -34,6 +34,9 @@ val catalog = the<VersionCatalogsExtension>().named("libs")
 // exactly as the build checks. Spotless defaults reflowLongStrings and reorderImports to false.
 spotless {
     java {
+        // Generated sources, such as app's from the API's spec, live under build/ and keep the
+        // generator's layout.
+        targetExclude("build/**")
         googleJavaFormat(catalog.findVersion("google-java-format").get().requiredVersion)
             .style("GOOGLE")
             .reflowLongStrings(true)

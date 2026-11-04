@@ -12,11 +12,12 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 /**
  * Tests at the backend's HTTP API: the whole app on a real port, against PostgreSQL, with the
- * signed-in user set per test by {@link TestSignIn}.
+ * signed-in user set per test by {@link TestSignIn}, and every exchange checked against the API's
+ * spec by {@link ApiSpecValidation}.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-@Import({TestSignIn.class, TestData.class})
+@Import({TestSignIn.class, TestData.class, ApiSpecValidation.class})
 public abstract class HttpSeamTest {
 
   @Autowired protected RestTestClient http;

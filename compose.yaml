@@ -26,7 +26,10 @@ services:
       retries: 30
 
   backend:
-    build: ./backend
+    # From the repository root: the backend's build reads api/openapi.yaml.
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ampolatech

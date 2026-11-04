@@ -14,7 +14,7 @@ From the repository root:
 docker compose up --build
 ```
 
-It starts PostgreSQL and the backend under the `local` profile, on <http://localhost:8080>, and seeds a demo pharmacy and its sales agent (`db/postgresql/changelog/db.changelog-local.yaml`). `curl localhost:8080/api/me` answers with that agent, whom the demo sign-in signs everyone in as.
+It builds the backend's image from the repository root, since the build reads `api/openapi.yaml`. It starts PostgreSQL and the backend under the `local` profile, on <http://localhost:8080>, and seeds a demo pharmacy and its sales agent (`db/postgresql/changelog/db.changelog-local.yaml`). `curl localhost:8080/api/me` answers with that agent, whom the demo sign-in signs everyone in as.
 
 The `local` profile is the only one that runs on a machine: the others take the database from the environment, and nothing in them signs anyone in. To run the backend outside Docker, start only the database and run the app under that profile:
 
@@ -39,6 +39,8 @@ From `backend/`:
 ```
 
 The tests start PostgreSQL with Testcontainers on a random port, so they need Docker running but no free port.
+
+The build generates the web adapter's interfaces and models from the API's spec, `api/openapi.yaml` ([ADR 0006](../docs/adr/0006-openapi-contract-first.md)), into `app/build/generated/openapi/`. None of it is committed.
 
 An editor formats the way the build checks when it runs google-java-format's command line, at the version in `gradle/libs.versions.toml` and with its default options.
 
