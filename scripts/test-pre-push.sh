@@ -65,6 +65,17 @@ commit_probe
 branch java-formatted
 printf 'final class Probe {}\n' >backend/app/src/main/java/Probe.java
 commit_probe
+branch build-unconfigurable
+echo 'this is not Kotlin' >>backend/build.gradle.kts
+commit_probe
+branch java-uncompilable
+# javac repeats the line it can't compile, comment included, among the
+# lines Gradle prints; the hook must read only Gradle's own.
+printf 'final class Probe {\n  Missing field; // There were failing tests\n}\n' >backend/app/src/main/java/Probe.java
+commit_probe
+branch java-unparseable
+printf 'final class Probe {\n' >backend/app/src/main/java/Probe.java
+commit_probe
 branch java-unlayered
 printf 'package dev.ampolatech.adapter.in.web.rest;\n\nimport dev.ampolatech.application.UserApplicationService;\n\nfinal class Probe {\n  private UserApplicationService service;\n}\n' >backend/app/src/main/java/dev/ampolatech/adapter/in/web/rest/Probe.java
 commit_probe
@@ -130,6 +141,9 @@ expect "a push to main is refused" 1 '*main takes changes only through pull requ
 expect "a commit message check-commits.sh refuses is refused" 1 '*commit messages above break*' "$(push bad-message)"
 expect "Java google-java-format would change is refused" 1 '*fails the format check*' "$(push java-unformatted)"
 expect "Java google-java-format leaves alone passes" 0 '*' "$(push java-formatted)"
+expect "a build Gradle can't configure is refused as not format-checked" 1 '*Gradle stopped on build-unconfigurable before it ran the format check*' "$(push build-unconfigurable)"
+expect "Java google-java-format can't parse is refused, the parse named" 1 '*fails the format check above: google-java-format can*t parse*' "$(push java-unparseable)"
+expect "Java that doesn't compile is refused as not tested" 1 '*Gradle stopped on java-uncompilable before it ran the architecture test*' "$(push java-uncompilable)"
 expect "a web adapter using an application service is refused, its rule and class named" 1 '*the_layers_should_reach_each_other_only_through_the_ports FAILED*Probe.service*fails the architecture test*' "$(push java-unlayered)"
 expect "a script shellcheck flags is refused" 1 '*fails shellcheck*' "$(push script-flagged)"
 expect "a clean script passes" 0 '*' "$(push script-clean)"
