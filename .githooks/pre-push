@@ -55,7 +55,7 @@ export_commit() {
   fi
 }
 
-log="$work/gradle.log"
+log="$work/check.log"
 
 # Runs Gradle in an exported commit's backend/, its output in $log.
 gradle_on() { # commit gradle-argument...
@@ -88,6 +88,21 @@ refuse_after_gradle() { # branch check [pattern refusal]...
   exit 1
 }
 
+# Runs pnpm in an exported commit's web/, its output in $log.
+pnpm_on() { # commit pnpm-argument...
+  (
+    cd "$work/$1/web"
+    shift
+    pinned pnpm "$@"
+  ) >"$log" 2>&1
+}
+
+refuse_after_pnpm() { # branch refusal
+  cat "$log" >&2
+  echo "pre-push: $1 $2" >&2
+  exit 1
+}
+
 for ref in $pushed; do
   branch=${ref%:*}
   branch=${branch#refs/heads/}
@@ -112,6 +127,23 @@ for ref in $pushed; do
       refuse_after_gradle "$branch" "the architecture test" \
         '^> There were failing tests' \
         "fails the architecture test above; move or change the classes it names on that branch and amend"
+  fi
+  # The web app's build generates its client from api/openapi.yaml too,
+  # so a change to the spec alone can break the web app's type-check.
+  if printf '%s\n' "$changed" | grep -Eq '^(api|web)/'; then
+    export_commit "$sha"
+    if [ ! -d "$work/$sha/web" ]; then
+      echo "pre-push: $branch has no web/ to check; rebase it onto main" >&2
+      exit 1
+    fi
+    pnpm_on "$sha" install --frozen-lockfile ||
+      refuse_after_pnpm "$branch" "fails pnpm install --frozen-lockfile above; run pnpm install in web/ on that branch and amend, or run mise install when pnpm is missing"
+    pnpm_on "$sha" generate ||
+      refuse_after_pnpm "$branch" "fails pnpm generate above; fix the spec or the route it names on that branch and amend"
+    pnpm_on "$sha" typecheck ||
+      refuse_after_pnpm "$branch" "fails the web app's type-check above; fix the code it names on that branch and amend"
+    pnpm_on "$sha" check ||
+      refuse_after_pnpm "$branch" "fails Biome's check above; run pnpm fix in web/ on that branch and amend, then fix what it leaves"
   fi
   if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"

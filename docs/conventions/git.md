@@ -92,6 +92,7 @@ The repository is private on GitHub's free plan, which allows no ruleset, so Git
   - a commit `origin` doesn't have yet breaks a rule `scripts/check-commits.sh` checks (see *Commits*);
   - a branch whose new commits change `backend/` fails `./gradlew spotlessCheck`, since google-java-format would change its Java;
   - a branch whose new commits change `api/` or `backend/` fails `ArchitectureTest`, which checks where the backend's code lives and what it may use ([hexagonal.md](hexagonal.md)), or doesn't compile, as when the spec in `api/` adds an operation no controller implements;
+  - a branch whose new commits change `api/` or `web/` fails `pnpm install --frozen-lockfile`, `pnpm generate`, `pnpm typecheck` or `pnpm check` in `web/`, with the pnpm `mise.toml` pins, as when the spec renames a property a page reads ([ADR 0006](../adr/0006-openapi-contract-first.md));
   - a branch whose new commits change `.githooks/` or `scripts/` fails shellcheck, at the version `mise.toml` pins, over the hook and `scripts/*.sh`;
   - a branch whose new commits change a Markdown file, `.markdownlint-cli2.jsonc`, `scripts/lint-docs.sh`, `scripts/markdownlint-cli2.sh`, `mise.toml` or `mise.lock` fails `scripts/lint-docs.sh` (see [markdown.md](markdown.md));
   - a branch whose new commits change `.githooks/` or `scripts/test-pre-push.sh` fails `scripts/test-pre-push.sh`, which pushes a fixture branch through the branch's hook for each case in this list. A new check comes with its fixtures there.
