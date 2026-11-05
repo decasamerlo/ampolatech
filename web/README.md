@@ -40,6 +40,8 @@ pnpm typecheck   # tsc alone, on the app, the tools' configs and the tests
 
 Vite transpiles TypeScript without checking it, so `pnpm build` runs `tsc` before it bundles: code that reads what the spec no longer declares fails the build ([ADR 0006](../docs/adr/0006-openapi-contract-first.md)).
 
+Before committing a change to `web/` or `api/`, run `pnpm generate`, `pnpm typecheck` and `pnpm check` until all three exit 0; `pnpm typecheck` checks against the client `pnpm generate` wrote last. The pre-push hook refuses a push when one fails ([git.md](../docs/conventions/git.md)).
+
 ## Test in a browser
 
 Once per machine, from `web/`, install the Chromium Playwright drives:

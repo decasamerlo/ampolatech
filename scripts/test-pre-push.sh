@@ -87,6 +87,30 @@ branch spec-unimplemented
 } >api/probe.yaml
 mv api/probe.yaml api/openapi.yaml
 commit_probe
+branch spec-role-unlabelled
+sed 's/enum: \[PHARMACIST, SALES_AGENT\]/enum: [PHARMACIST, SALES_AGENT, PROBE]/' api/openapi.yaml >api/probe.yaml
+mv api/probe.yaml api/openapi.yaml
+commit_probe
+branch web-lockfile-stale
+sed 's/"react": "19.3.1"/"react": "19.3.0"/' web/package.json >web/probe.json
+mv web/probe.json web/package.json
+commit_probe
+branch web-ungenerated
+sed 's|../api/openapi.yaml|../api/missing.yaml|' web/orval.config.ts >web/probe.ts
+mv web/probe.ts web/orval.config.ts
+commit_probe
+branch web-missing
+git rm -q -r web
+commit_probe
+branch web-unchecked
+printf 'import { useGetSignedInUser } from "../api/generated/users/users";\n\nexport function OrdersPage() {\n\tconst query = useGetSignedInUser();\n\treturn <h1>{query.data?.email}</h1>;\n}\n' >web/src/orders/orders-page.tsx
+commit_probe
+branch web-unformatted
+printf 'export const probe  =  1;\n' >web/src/probe.ts
+commit_probe
+branch web-clean
+printf 'export const probe = 1;\n' >web/src/probe.ts
+commit_probe
 # shellcheck disable=SC2016 # the fixture script's own $1
 {
   branch script-flagged
@@ -154,6 +178,13 @@ expect "Java google-java-format can't parse is refused, the parse named" 1 '*fai
 expect "Java that doesn't compile is refused as not tested" 1 '*Gradle stopped on java-uncompilable before it ran the architecture test*' "$(push java-uncompilable)"
 expect "a web adapter using an application service is refused, its rule and class named" 1 '*the_layers_should_reach_each_other_only_through_the_ports FAILED*Probe.service*fails the architecture test*' "$(push java-unlayered)"
 expect "an operation the spec adds and no controller implements is refused as not tested" 1 '*does not override abstract method getProbe*Gradle stopped on spec-unimplemented before it ran the architecture test*' "$(push spec-unimplemented)"
+expect "a role the spec adds and the web app has no label for is refused, the type-check named" 1 "*Property 'PROBE' is missing*fails the web app's type-check*" "$(push spec-role-unlabelled)"
+expect "a web/ lockfile out of step with package.json is refused" 1 '*ERR_PNPM_OUTDATED_LOCKFILE*fails pnpm install --frozen-lockfile*' "$(push web-lockfile-stale)"
+expect "a client Orval can't generate is refused" 1 '*missing.yaml*fails pnpm generate*' "$(push web-ungenerated)"
+expect "a change to web/ that leaves no web/ is refused as not checked" 1 '*has no web/ to check*' "$(push web-missing)"
+expect "a page reading a property the spec's SignedInUser lacks is refused, the type-check named" 1 "*Property 'email' does not exist on type 'SignedInUser'*fails the web app's type-check*" "$(push web-unchecked)"
+expect "web/ code Biome would reformat is refused" 1 "*fails Biome's check*" "$(push web-unformatted)"
+expect "web/ code Biome leaves alone passes" 0 '*' "$(push web-clean)"
 expect "a script shellcheck flags is refused" 1 '*fails shellcheck*' "$(push script-flagged)"
 expect "a clean script passes" 0 '*' "$(push script-clean)"
 expect "Markdown the lint fails is refused" 1 '*fails the Markdown lint*' "$(push md-failing)"
