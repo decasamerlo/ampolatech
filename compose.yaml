@@ -1,4 +1,5 @@
-# The backend and its database on one machine: `docker compose up --build`.
+# The whole app on one machine: the web app, the backend and its database.
+# README.md says how to run it.
 name: ampolatech
 
 services:
@@ -33,6 +34,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ampolatech
+    # The web service reaches the backend inside Compose's network; the port
+    # is published for curl and for Vite's dev server, which proxies to it.
     # Only this machine: the demo sign-in signs in whoever connects. Set
     # AMPOLATECH_BACKEND_PORT when another process holds 8080.
     ports:
@@ -46,6 +49,26 @@ services:
       retries: 60
     depends_on:
       postgres:
+        condition: service_healthy
+
+  web:
+    # From the repository root: the web app's build reads api/openapi.yaml.
+    # nginx serves the built app and proxies /api/ to the backend, on one
+    # origin (ADR 0008).
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    # Only this machine: through the proxy, the demo sign-in signs in whoever
+    # connects. Set AMPOLATECH_WEB_PORT when another process holds 8081.
+    ports:
+      - "127.0.0.1:${AMPOLATECH_WEB_PORT:-8081}:80"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://127.0.0.1/"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      backend:
         condition: service_healthy
 
 volumes:
