@@ -35,10 +35,26 @@ pnpm build       # generate, type-check, then bundle into dist/
 pnpm check       # Biome's format and lint check; a warning fails it too
 pnpm fix         # Biome's formatting and safe fixes, written to the files
 pnpm generate    # the API's client and the route tree alone
-pnpm typecheck   # tsc alone, on the app and on the tools' configs
+pnpm typecheck   # tsc alone, on the app, the tools' configs and the tests
 ```
 
 Vite transpiles TypeScript without checking it, so `pnpm build` runs `tsc` before it bundles: code that reads what the spec no longer declares fails the build ([ADR 0006](../docs/adr/0006-openapi-contract-first.md)).
+
+## Test in a browser
+
+Once per machine, from `web/`, install the Chromium Playwright drives:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+Then, with Docker running:
+
+```bash
+pnpm test:e2e
+```
+
+It runs the tests in `e2e/` against the whole app, built and started fresh beside the stack `docker compose up` runs, under a Compose project and ports of its own (`e2e/stack.ts`), and removes it afterwards. [testing.md](../docs/conventions/testing.md) says what a test there uses.
 
 ## Generated code
 
