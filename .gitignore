@@ -31,3 +31,7 @@ CLAUDE.local.md
 /web/src/routeTree.gen.ts
 # Where the route tree's generator writes while it runs.
 /web/.tanstack/
+
+# Playwright's output: each test's traces and screenshots, and its reports.
+/web/test-results/
+/web/playwright-report/
