@@ -14,13 +14,17 @@ pnpm installs only releases at least 7 days old, and fails the install when a ve
 
 ## Develop
 
-From `web/`, with the backend running ([backend/README.md](../backend/README.md)):
+From `web/`, with the backend running ([README.md](../README.md)):
 
 ```bash
 pnpm dev
 ```
 
-It generates the API's client and the route tree, then starts Vite's dev server on the address it prints, <http://localhost:5173> when that port is free. The server sends `/api` to the backend on `AMPOLATECH_BACKEND_PORT`, 8080 when unset, the port Compose publishes the backend on, so the app and the API share an origin as they do once deployed. A change to `api/openapi.yaml` reaches the running server on the next `pnpm generate`.
+It generates the API's client and the route tree, then starts Vite's dev server on the address it prints, <http://localhost:5173> when that port is free. The server sends `/api` to the backend on `AMPOLATECH_BACKEND_PORT`, 8080 when unset, the port Compose publishes the backend on, so the app and the API share an origin, as they do behind nginx. A change to `api/openapi.yaml` reaches the running server on the next `pnpm generate`.
+
+## Run it with the backend
+
+The whole app runs from the repository root ([README.md](../README.md)), its `web` service built from this folder's `Dockerfile`: nginx, configured by `nginx.conf`, which says what it caches and what it compresses. A change under `src/` reaches the served app with the next `docker compose up --build`, which rebuilds the image, and `pnpm dev` at once.
 
 ## Build and check
 

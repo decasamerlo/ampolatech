@@ -1,0 +1,13 @@
+# The image builds from the repository root and needs only api/ and web/,
+# without the installed packages, the build output, what `pnpm generate`
+# writes or the Docker files themselves.
+*
+!api/
+!web/
+web/node_modules
+web/dist
+web/src/api/generated
+web/src/routeTree.gen.ts
+web/.tanstack
+web/Dockerfile
+web/Dockerfile.dockerignore
