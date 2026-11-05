@@ -22,6 +22,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 ## Running the code
 
 - **Building, testing or running the backend?** `./gradlew` runs on the Java `mise.toml` pins, and the tests and the local run need Docker. See `backend/README.md`.
+- **Building, checking or running the web app?** `pnpm` runs on the pnpm `mise.toml` pins, and the API's client and the route tree come from `pnpm generate`, never from git. See `web/README.md`.
 
 ## References
 

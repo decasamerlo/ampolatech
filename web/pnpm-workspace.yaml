@@ -1,0 +1,18 @@
+# pnpm's settings. pnpm reads only auth, registry, TLS, proxy and
+# local-address settings from .npmrc.
+
+# Orval's @orval/core pulls in esbuild, whose build script Orval doesn't
+# need. pnpm fails an install that leaves a dependency's build script
+# neither allowed nor denied.
+allowBuilds:
+  esbuild: false
+
+# 7 days, the age #2 sets for a dependency update. Written out, since
+# pnpm's default differs between majors; set here, a version younger than
+# that fails the install instead of being skipped.
+minimumReleaseAge: 10080
+
+# package.json names the exact version the lockfile resolves, as `pnpm add`
+# writes it with this set. A range named on the command line, such as
+# `name@7`, stays a range.
+savePrefix: ""

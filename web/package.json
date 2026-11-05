@@ -1,0 +1,33 @@
+{
+	"name": "ampolatech-web",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "pnpm generate && vite",
+		"generate": "orval && tsr generate",
+		"typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.node.json",
+		"build": "pnpm generate && pnpm typecheck && vite build",
+		"check": "biome ci --error-on-warnings .",
+		"fix": "biome check --write ."
+	},
+	"dependencies": {
+		"@tanstack/react-query": "5.105.0",
+		"@tanstack/react-router": "1.170.46",
+		"react": "19.3.1",
+		"react-dom": "19.3.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.6.4",
+		"@tailwindcss/vite": "4.3.3",
+		"@tanstack/router-cli": "1.167.46",
+		"@tanstack/router-plugin": "1.168.48",
+		"@types/node": "26.6.6",
+		"@types/react": "19.3.0",
+		"@types/react-dom": "19.3.0",
+		"@vitejs/plugin-react": "6.1.2",
+		"orval": "8.45.0",
+		"tailwindcss": "4.3.3",
+		"typescript": "7.0.2",
+		"vite": "8.3.5"
+	}
+}
