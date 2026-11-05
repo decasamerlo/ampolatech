@@ -1,0 +1,18 @@
+// The code that runs in Node rather than the browser: the tools' configs.
+{
+	"compilerOptions": {
+		"target": "ES2023",
+		"lib": ["ES2023"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"types": ["node"],
+		// The tools' own declarations reach for what a Node-side check doesn't
+		// load: the DOM, peers they leave optional and packages without types.
+		"skipLibCheck": true
+	},
+	"include": ["*.config.ts"]
+}
