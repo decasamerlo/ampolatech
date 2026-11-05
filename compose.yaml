@@ -1,6 +1,9 @@
 # The whole app on one machine: the web app, the backend and its database.
 # README.md says how to run it.
-name: ampolatech
+#
+# No top-level name: Compose names the project after the folder that holds
+# this file, so checkouts in folders it names differently run containers and
+# databases of their own. A fixed name makes every checkout one project.
 
 services:
   postgres:
