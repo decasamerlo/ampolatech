@@ -21,7 +21,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 
 ## Running the code
 
-- **Running the whole app?** Every checkout runs as the same Compose project, `ampolatech`: from a second checkout or a probe, give `docker compose` a `-p` and its own port variables, or it takes over the first one's containers and database. See `README.md`.
+- **Running the whole app, or any `docker compose` command?** In a second copy or a probe folder, give it a `-p` and port variables of its own: copies in folders Compose names alike share a project and its database, and a probe folder inside a checkout, with no `compose.yaml` of its own, takes the checkout's project. See `README.md`.
 - **Building, testing or running the backend?** `./gradlew` runs on the Java `mise.toml` pins, and the tests and the local run need Docker. See `backend/README.md`.
 - **Building, checking, testing or running the web app?** `pnpm` runs on the pnpm `mise.toml` pins, the API's client and the route tree come from `pnpm generate`, never from git, and the browser tests need Docker. See `web/README.md`.
 
