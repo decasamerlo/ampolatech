@@ -37,11 +37,11 @@ _Avoid_: Customer, client, user
 ### Orders
 
 **Prescription**:
-The document a doctor wrote, as the sales agent received it. Every order carries the prescription it was registered from.
+The document a doctor wrote, as the sales agent received it. A prescription can be registered without an order.
 _Avoid_: Script, Rx, receipt (a false friend of _receita_)
 
 **Order**:
-The pharmacy's record of what to prepare from one prescription for one patient.
+The pharmacy's record of what to prepare for one patient. An order may carry the prescription it was registered from.
 _Avoid_: Request, sale, purchase
 
 **Order item**:
