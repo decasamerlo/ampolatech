@@ -69,6 +69,8 @@ A method's prefix says what absence means, in driving and driven ports alike:
 
 **The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in `core`'s `application` package: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `core`, it depends on no framework, so it carries no annotation and the composition root builds it.
 
+**An operation writes through one driven port.** Its write then needs no transaction beyond the one its adapter runs, and no application service opens one. An operation that would write through two needs a decision first on where its transaction begins, since an application service can't carry Spring's `@Transactional` ([ADR 0007](../adr/0007-backend-modules.md)); #105 weighs the options.
+
 ## Sources
 
 - Alistair Cockburn, [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/): the application talks to the outside only through ports, which adapters call or implement.
