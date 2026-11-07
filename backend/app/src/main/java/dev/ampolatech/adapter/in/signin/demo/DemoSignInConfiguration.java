@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Signs everyone in as one user, whose actor it reads from configuration (ADR 0004). It reads no
- * database: ADR 0003 has each transaction take its pharmacy from the actor, so finding the actor
- * can't need a query. It signs in anyone who opens the app, so {@link DemoSignInGuard} refuses to
- * start the app with it unless the local profile is the only one active.
+ * database: ADR 0003's row-level security, which ADR 0009 defers, takes each transaction's pharmacy
+ * from the actor, so finding the actor can't need a query. It signs in anyone who opens the app, so
+ * {@link DemoSignInGuard} refuses to start the app with it unless the local profile is the only one
+ * active.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBooleanProperty(DemoSignInProperties.ENABLED)
