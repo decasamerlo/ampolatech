@@ -24,7 +24,7 @@ It generates the API's client and the route tree, then starts Vite's dev server 
 
 ## Run it with the backend
 
-The whole app runs from the repository root ([README.md](../README.md)), its `web` service built from this folder's `Dockerfile`: nginx, configured by `nginx.conf`, which says what it caches and what it compresses. A change under `src/` reaches the served app with the next `docker compose up --build`, which rebuilds the image, and `pnpm dev` at once.
+The whole app runs from the repository root ([README.md](../README.md)), its `web` service built from this folder's `Dockerfile`: nginx, configured by `nginx.conf`, which says what it caches and what it compresses. A change under `src/` shows in `pnpm dev` at once, and in the `web` service after the next `docker compose up`.
 
 ## Build and check
 

@@ -4,5 +4,5 @@ import { compose } from "./stack";
 // before its teardown goes first.
 export default function globalSetup(): void {
 	compose("down", "--volumes");
-	compose("up", "--build", "--wait");
+	compose("up", "--wait");
 }
