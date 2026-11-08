@@ -11,6 +11,8 @@ A comment is read in a **fresh checkout**: the repository at that commit and not
 
 Comments go on the code a change touches. A comment there that the change makes false is corrected or removed in the same change.
 
+Before the change's review, run the writing-for-agents skill over each comment the change writes or edits, and over every other place that states the same facts. Where the skill and this convention differ, this convention wins.
+
 ## Worth a comment
 
 - **The reason behind a public type or method**, in its Javadoc, when the signature leaves it out: what it's for, what a caller must ensure first, what it promises. When the name and types already say all of that, it gets no Javadoc.
