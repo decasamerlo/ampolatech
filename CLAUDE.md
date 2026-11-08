@@ -17,7 +17,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 - **Writing or changing `api/openapi.yaml` or the web adapter?** A name or a shape a client sees is the author's to decide when the issue leaves it open. See `docs/conventions/api.md`.
 - **Adding or changing a port, an adapter, an application service or a rule in `ArchitectureTest`?** Ports and services live in `core` and adapters in `app`, and `ArchitectureTest` fails a class that uses a package its layer's allow-list doesn't name; a driving port takes the actor as an input. See `docs/conventions/hexagonal.md`.
 - **Writing or changing a test, or behaviour that needs one?** Each behaviour is tested at one seam, the domain types, the HTTP API, the app's start or the web app end to end, and the seam decides what the test may use. See `docs/conventions/testing.md`.
-- **Adding a table, a constraint or a JPA entity?** PostgreSQL reserves some of the most natural table names, `user` and `order` among them. See `docs/conventions/database-naming.md`.
+- **Adding a table, a column, a constraint or a JPA entity?** PostgreSQL reserves some of the most natural table names, `user` and `order` among them, and an entity names its table and every column it maps. See `docs/conventions/database-naming.md`.
 
 ## Running the code
 

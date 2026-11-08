@@ -76,7 +76,7 @@ It reports a misleading name as a defect rather than a judgement call, fixed in 
 ## Examples
 
 - **`build-logic` over `buildSrc`.** Gradle 9.8.2's `init` puts convention plugins in `buildSrc`; its [best-practices page](https://docs.gradle.org/9.8.2/userguide/best_practices_structuring_builds.html) prefers an included build named `build-logic`. The documentation outranks the scaffold. Moving an existing plugin means restacking unreviewed layers, a cost only to the author, so it doesn't decide.
-- **Every JPA column named.** "A two-word field maps to the wrong column" is false on Spring Boot 4.1.1, whose default naming strategy maps `pharmacyId` to `pharmacy_id`. The reason that holds is renames: a derived name ties the column to the Java field, so renaming the field renames the column.
+- **Every JPA column named.** The column a naming strategy derives from a field is a default a reader can't always predict, so every column of an entity is written out ([database-naming.md](database-naming.md#every-table-and-column-is-named-explicitly)).
 - **Records.** The language generates a record's accessors, `equals`, `hashCode` and `toString` the same way every time: a default that never varies.
 - **TanStack Router over the more widely used React Router** ([ADR 0002](../adr/0002-stack.md)): newer, stable and maintained, with type-checked routes and search params.
 - **OpenAPI 3.1, not 3.2.** 3.2 is the newest version of the specification, but the pinned openapi-generator rejects it ([API contract research](../research/api-contract.md)), so it fails the test of working with the pinned versions.
