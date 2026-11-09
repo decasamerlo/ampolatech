@@ -1,6 +1,6 @@
 # Staff sign in with Google; AmpolaTech keeps its own users
 
-Staff sign in with their Google accounts through OpenID Connect, and AmpolaTech stores no passwords. It keeps its own user records (name, role, pharmacy), and only an email a pharmacy has registered can sign in: nobody signs up on their own. Google proves who someone is; AmpolaTech decides what they may do. The first pharmacy's staff all have Google accounts.
+Staff sign in with their Google accounts through OpenID Connect, and AmpolaTech stores no passwords. It keeps its own user records (name, roles, pharmacy), and only an email a pharmacy has registered can sign in: nobody signs up on their own. Google proves who someone is; AmpolaTech decides what they may do. The first pharmacy's staff all have Google accounts.
 
 ## Considered options
 

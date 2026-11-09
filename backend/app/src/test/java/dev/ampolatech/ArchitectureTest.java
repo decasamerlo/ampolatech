@@ -109,7 +109,10 @@ class ArchitectureTest {
               "org.springframework.stereotype",
               "org.springframework.web.bind.annotation",
               "org.springframework.web.context.request",
-              "org.springframework.web.servlet.mvc.method.annotation");
+              "org.springframework.web.servlet.mvc.method.annotation",
+              "tools.jackson.databind",
+              "tools.jackson.databind.annotation",
+              "tools.jackson.databind.util");
 
   @ArchTest
   static final ArchRule sign_in_adapters_should_use_only_their_allowed_packages =

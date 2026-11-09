@@ -13,7 +13,7 @@ paths:
       tags: [users]
       responses:
         "200":
-          description: The signed-in user, with their role and the pharmacy they work for.
+          description: The signed-in user, with their roles and the pharmacy they work for.
           content:
             application/json:
               schema:
@@ -31,12 +31,18 @@ components:
   schemas:
     SignedInUser:
       type: object
-      required: [name, role, pharmacy]
+      required: [name, roles, pharmacy]
       properties:
         name:
           type: string
-        role:
-          $ref: "#/components/schemas/Role"
+        roles:
+          description: >-
+            The roles the user holds, in the order the Role schema lists them.
+            A user may hold none.
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/Role"
         pharmacy:
           $ref: "#/components/schemas/Pharmacy"
     Role:

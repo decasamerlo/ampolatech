@@ -4,7 +4,7 @@ How AmpolaTech names its PostgreSQL tables, the names built from them, and the c
 
 ## Tables are singular
 
-A table is named for one of its rows, in snake_case: `pharmacy`. A name built from a table embeds it unchanged: `pharmacy_pkey`, `fk_app_user_pharmacy_id`, `app_user_role_check`.
+A table is named for one of its rows, in snake_case: `pharmacy`. A name built from a table embeds it unchanged: `pharmacy_pkey`, `fk_app_user_pharmacy_id`, `app_user_name_check`.
 
 ## Every table and column is named explicitly
 

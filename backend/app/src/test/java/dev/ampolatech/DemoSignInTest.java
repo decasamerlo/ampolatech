@@ -1,6 +1,7 @@
 package dev.ampolatech;
 
 import dev.ampolatech.domain.Role;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class DemoSignInTest {
   @Test
   @DisplayName("should sign everyone in as the demo sales agent under the local profile")
   void should_sign_everyone_in_as_the_demo_sales_agent_under_the_local_profile() {
-    data.user(data.pharmacy("Farmácia Horizonte"), "Carlos Souza", Role.SALES_AGENT);
+    data.user(data.pharmacy("Farmácia Horizonte"), "Carlos Souza", Set.of(Role.SALES_AGENT));
 
     ResponseSpec response = http.get().uri("/api/me").exchange();
 
@@ -47,7 +48,7 @@ class DemoSignInTest {
             """
             {
               "name": "Joana Exemplo",
-              "role": "SALES_AGENT",
+              "roles": ["SALES_AGENT"],
               "pharmacy": {"name": "Farmácia Exemplo"}
             }
             """,

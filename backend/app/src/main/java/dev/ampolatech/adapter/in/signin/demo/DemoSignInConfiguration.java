@@ -27,7 +27,7 @@ class DemoSignInConfiguration {
         new Actor(
             UserId.of(properties.userId()),
             PharmacyId.of(properties.pharmacyId()),
-            properties.role());
+            properties.roles());
     return () -> actor;
   }
 }
