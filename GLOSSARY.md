@@ -11,12 +11,16 @@ A compounding pharmacy that uses AmpolaTech. Every user works for exactly one ph
 _Avoid_: Client, customer, org, tenant
 
 **User**:
-A member of a pharmacy's staff who signs in to AmpolaTech. Their role, such as sales agent or pharmacist, sets what they may do.
+A member of a pharmacy's staff who signs in to AmpolaTech. Their roles set what they may do.
 _Avoid_: Account, login
 
 **Actor**:
-The user a request acts for, as far as the request needs them: who they are, the pharmacy they work for, and their role.
+The user a request acts for, as far as the request needs them: who they are, the pharmacy they work for, and their roles.
 _Avoid_: Principal
+
+**Role**:
+A named set of permissions a user holds in their pharmacy, such as sales agent or pharmacist. It is often named after a job, but needn't match the jobs its holder does.
+_Avoid_: Permission, job, profile (a false friend of _perfil_), access level
 
 **Doctor**:
 The physician who wrote a prescription. Doctors don't use AmpolaTech; they send their prescriptions to a sales agent over WhatsApp.
