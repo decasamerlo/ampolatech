@@ -43,6 +43,10 @@ export GIT_AUTHOR_NAME=test-pre-push GIT_AUTHOR_EMAIL=test-pre-push@example.inva
 export GIT_COMMITTER_NAME=test-pre-push GIT_COMMITTER_EMAIL=test-pre-push@example.invalid
 cd "$work"
 git init -q -b main
+# Git's default, which a user's config can turn off. The cases with a
+# file named outside ASCII need git to quote that name, so they show
+# the hook reads it all the same.
+git config core.quotePath true
 git add -A -f # the commit's whole tree, the paths .gitignore lists included
 git commit -q -m "chore: the commit under test" -m "Refs: #1"
 git update-ref refs/remotes/origin/main main
@@ -59,6 +63,10 @@ branch bad-message
 echo probe >probe.txt
 git add -A
 git commit -q -m "Probe"
+branch scope-non-ascii
+echo probe >scripts/ação.txt
+git add -A
+git commit -q -m "chore(scripts): probe" -m "Refs: #1"
 branch java-unformatted
 printf 'final class Probe{  }\n' >backend/app/src/main/java/Probe.java
 commit_probe
@@ -107,6 +115,9 @@ printf 'import { useGetSignedInUser } from "../api/generated/users/users";\n\nex
 commit_probe
 branch web-unformatted
 printf 'export const probe  =  1;\n' >web/src/probe.ts
+commit_probe
+branch web-unformatted-non-ascii
+printf 'export const probe  =  1;\n' >web/src/ação.ts
 commit_probe
 branch web-clean
 printf 'export const probe = 1;\n' >web/src/probe.ts
@@ -171,6 +182,7 @@ expect() { # name exit pattern push-line, the pattern matched against all the ho
 
 expect "a push to main is refused" 1 '*main takes changes only through pull requests*' "$(push main)"
 expect "a commit message check-commits.sh refuses is refused" 1 '*commit messages above break*' "$(push bad-message)"
+expect "a scope holding a file named outside ASCII passes" 0 '*' "$(push scope-non-ascii)"
 expect "Java google-java-format would change is refused" 1 '*fails the format check*' "$(push java-unformatted)"
 expect "Java google-java-format leaves alone passes" 0 '*' "$(push java-formatted)"
 expect "a build Gradle can't configure is refused as not format-checked" 1 '*Gradle stopped on build-unconfigurable before it ran the format check*' "$(push build-unconfigurable)"
@@ -184,6 +196,7 @@ expect "a client Orval can't generate is refused" 1 '*missing.yaml*fails pnpm ge
 expect "a change to web/ that leaves no web/ is refused as not checked" 1 '*has no web/ to check*' "$(push web-missing)"
 expect "a page reading a property the spec's SignedInUser lacks is refused, the type-check named" 1 "*Property 'email' does not exist on type 'SignedInUser'*fails the web app's type-check*" "$(push web-unchecked)"
 expect "web/ code Biome would reformat is refused" 1 "*fails Biome's check*" "$(push web-unformatted)"
+expect "web/ code Biome would reformat, in a file named outside ASCII, is refused" 1 "*ação.ts*fails Biome's check*" "$(push web-unformatted-non-ascii)"
 expect "web/ code Biome leaves alone passes" 0 '*' "$(push web-clean)"
 expect "a script shellcheck flags is refused" 1 '*fails shellcheck*' "$(push script-flagged)"
 expect "a clean script passes" 0 '*' "$(push script-clean)"

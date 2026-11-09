@@ -108,8 +108,13 @@ for ref in $pushed; do
   branch=${branch#refs/heads/}
   sha=${ref#*:}
   [ ! -d "$work/$sha" ] || continue # another ref at this commit passed
+  # -z prints each path as it is, where git would quote one holding a
+  # character git calls unusual, such as a byte outside ASCII, and the
+  # quote would hide the folder it starts with. A path holding a newline
+  # reads back as several lines, its start on the first and its end on
+  # the last, so it can only run a check it doesn't need.
   changed=$(git rev-list "$sha" --not --remotes=origin |
-    while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r "$commit"; done)
+    while read -r commit; do git diff-tree -m --root --no-commit-id --name-only -r -z "$commit" | tr '\0' '\n'; done)
   # The backend's build generates its web adapter from api/openapi.yaml,
   # so a change to the spec alone can break the backend's compile.
   if printf '%s\n' "$changed" | grep -Eq '^(api|backend)/'; then

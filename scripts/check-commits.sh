@@ -72,8 +72,11 @@ check() { # [commit]
       echo "$id: note: the scope ($scope) isn't checked, since a draft has no changed files yet" >&2
     elif [ -n "$scope" ]; then
       # CLAUDE.md points into every folder, so it goes with any scope.
-      outside=$(git diff-tree --root --no-commit-id --name-only -r "$commit" |
-        while IFS= read -r file; do
+      # -z prints each path as it is, where git would quote one holding
+      # a character git calls unusual, such as a byte outside ASCII, and
+      # the quote would hide the folder it starts with.
+      outside=$(git diff-tree --root --no-commit-id --name-only -r -z "$commit" |
+        while IFS= read -r -d '' file; do
           [[ $file == "$scope/"* || $file == "docs/$scope/"* || $file == CLAUDE.md ]] || printf '%s\n' "$file"
         done)
       if [ -n "$outside" ]; then
