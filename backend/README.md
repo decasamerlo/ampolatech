@@ -20,7 +20,7 @@ SPRING_PROFILES_ACTIVE=local ./gradlew :app:bootRun
 
 The local profile connects to PostgreSQL on the port Compose publishes it on, since both read `AMPOLATECH_POSTGRES_PORT`.
 
-When a changeset that already ran on your local database changes, Liquibase refuses to start on it; when it moves to another path, Liquibase runs it again, and fails. Start again from an empty database, as [README.md](../README.md) says.
+Until #42 deploys a database that can't be recreated, a change to the schema edits its changeset in place; from then on, it takes a new changeset. When a changeset that already ran on your local database changes, Liquibase refuses to start on it; when it moves to another path, Liquibase runs it again, and fails. Start again from an empty database, as [README.md](../README.md) says.
 
 ## Build and test
 

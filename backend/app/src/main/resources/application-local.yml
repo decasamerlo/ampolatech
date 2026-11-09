@@ -12,13 +12,21 @@ spring:
     parameters:
       demo-user-id: ${ampolatech.sign-in.demo.user-id}
       demo-pharmacy-id: ${ampolatech.sign-in.demo.pharmacy-id}
-      demo-role: ${ampolatech.sign-in.demo.role}
+      demo-roles: ${ampolatech.sign-in.demo.roles}
 
 ampolatech:
   sign-in:
     demo:
       enabled: true
-      # The demo sales agent of the demo pharmacy.
+      # The demo user of the demo pharmacy.
       user-id: 60601aa5-a0b7-4676-86eb-01a2dd58c7f5
       pharmacy-id: 54452d02-054a-4448-88c2-2b26a9f7c2a1
-      role: SALES_AGENT
+      # Comma-separated and spelled as the Role constants are, such as
+      # PHARMACIST,SALES_AGENT, or empty for none: the seed stores each as
+      # written, and app_user_role_role_check refuses any other spelling.
+      # Liquibase fills in the demo seed's parameters before it computes the
+      # seed's checksum, so changing a value on a seeded database stops the app
+      # from starting until the database is recreated. A YAML list binds to the
+      # roles too, but reaches the seed as the literal
+      # ${ampolatech.sign-in.demo.roles}, which fails app_user_role_role_check.
+      roles: SALES_AGENT

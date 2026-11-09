@@ -10,16 +10,26 @@ import org.springframework.stereotype.Repository;
 @Repository
 class UserPostgresqlRepository implements UserRepositoryPort {
 
-  private final SpringDataUserRepository springData;
+  private final SpringDataUserRepository users;
+  private final SpringDataUserRoleRepository userRoles;
   private final UserPersistenceMapper mapper;
 
-  UserPostgresqlRepository(SpringDataUserRepository springData, UserPersistenceMapper mapper) {
-    this.springData = springData;
+  UserPostgresqlRepository(
+      SpringDataUserRepository users,
+      SpringDataUserRoleRepository userRoles,
+      UserPersistenceMapper mapper) {
+    this.users = users;
+    this.userRoles = userRoles;
     this.mapper = mapper;
   }
 
   @Override
   public Optional<User> findById(UserId id, PharmacyId pharmacyId) {
-    return springData.findByIdAndPharmacyId(id.value(), pharmacyId.value()).map(mapper::toDomain);
+    return users
+        .findByIdAndPharmacyId(id.value(), pharmacyId.value())
+        .map(
+            user ->
+                mapper.toDomain(
+                    user, userRoles.findByUserIdAndPharmacyId(id.value(), pharmacyId.value())));
   }
 }

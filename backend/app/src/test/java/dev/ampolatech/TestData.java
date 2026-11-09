@@ -5,6 +5,7 @@ import dev.ampolatech.domain.PharmacyId;
 import dev.ampolatech.domain.Role;
 import dev.ampolatech.domain.User;
 import dev.ampolatech.domain.UserId;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
@@ -27,12 +28,21 @@ public class TestData {
     return pharmacy;
   }
 
-  public User user(Pharmacy pharmacy, String name, Role role) {
-    var user = new User(UserId.of(UUID.randomUUID()), pharmacy.id(), name, role);
+  public User user(Pharmacy pharmacy, String name, Set<Role> roles) {
+    var user = new User(UserId.of(UUID.randomUUID()), pharmacy.id(), name, roles);
+
     owner
-        .sql("INSERT INTO app_user (id, pharmacy_id, name, role) VALUES (?, ?, ?, ?)")
-        .params(user.id().value(), user.pharmacyId().value(), user.name(), user.role().name())
+        .sql("INSERT INTO app_user (id, pharmacy_id, name) VALUES (?, ?, ?)")
+        .params(user.id().value(), user.pharmacyId().value(), user.name())
         .update();
+
+    for (Role role : user.roles()) {
+      owner
+          .sql("INSERT INTO app_user_role (pharmacy_id, user_id, role) VALUES (?, ?, ?)")
+          .params(user.pharmacyId().value(), user.id().value(), role.name())
+          .update();
+    }
+
     return user;
   }
 }

@@ -6,3 +6,5 @@ databaseChangeLog:
       file: db/postgresql/changelog/001-create-pharmacy.sql
   - include:
       file: db/postgresql/changelog/002-create-app-user.sql
+  - include:
+      file: db/postgresql/changelog/003-create-app-user-role.sql

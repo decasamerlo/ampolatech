@@ -13,7 +13,7 @@ public class TestSignIn implements CurrentActor {
 
   public void signIn(User user) {
     Objects.requireNonNull(user, "user must not be null");
-    signIn(new Actor(user.id(), user.pharmacyId(), user.role()));
+    signIn(new Actor(user.id(), user.pharmacyId(), user.roles()));
   }
 
   /** Signs in the actor as given, even one whose pharmacy isn't their user's. */

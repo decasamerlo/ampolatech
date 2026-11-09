@@ -7,7 +7,6 @@ CREATE TABLE app_user (
   id uuid NOT NULL,
   pharmacy_id uuid NOT NULL,
   name text NOT NULL,
-  role text NOT NULL,
   CONSTRAINT app_user_pkey PRIMARY KEY (id),
   -- Lets a foreign key reference (pharmacy_id, id), so that a row can point
   -- only at a user of its own pharmacy (ADR 0003).
@@ -17,8 +16,7 @@ CREATE TABLE app_user (
   -- counts as whitespace, rather than [:space:], whose members vary by locale.
   CONSTRAINT app_user_name_check CHECK (
     name ~ '[^\u0009-\u000D\u001C-\u0020\u1680\u2000-\u2006\u2008-\u200A\u2028\u2029\u205F\u3000]'
-  ),
-  CONSTRAINT app_user_role_check CHECK (role IN ('PHARMACIST', 'SALES_AGENT'))
+  )
 );
 
 GRANT SELECT ON app_user TO ampolatech_app;

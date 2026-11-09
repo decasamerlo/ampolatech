@@ -20,9 +20,6 @@ class UserEntity {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "role", nullable = false)
-  private String role;
-
   protected UserEntity() {}
 
   UUID getId() {
@@ -35,9 +32,5 @@ class UserEntity {
 
   String getName() {
     return name;
-  }
-
-  String getRole() {
-    return role;
   }
 }
