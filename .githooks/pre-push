@@ -18,11 +18,12 @@ done
 
 [ -n "$pushed" ] || exit 0
 commits=$(for ref in $pushed; do git rev-list "${ref#*:}" --not --remotes=origin; done | sort -u)
-[ -n "$commits" ] || exit 0
 
 checked=0
-# shellcheck disable=SC2086 # one word per commit
-scripts/check-commits.sh $commits || checked=$?
+if [ -n "$commits" ]; then
+  # shellcheck disable=SC2086 # one word per commit
+  scripts/check-commits.sh $commits || checked=$?
+fi
 if [ "$checked" -eq 1 ]; then
   echo "pre-push: the commit messages above break docs/conventions/git.md; amend them" >&2
   exit 1
@@ -30,6 +31,26 @@ elif [ "$checked" -ne 0 ]; then
   echo "pre-push: scripts/check-commits.sh stopped with exit $checked, above, before it checked every message" >&2
   exit 1
 fi
+
+# The check reads each pushed branch's commit rather than its new
+# commits, since only that commit's tree reaches main: a branch whose
+# later commit moves a nested .gitignore's entries to the root one
+# passes, and a branch at a commit origin already has is read too. It
+# needs no export or tool, so it refuses before the checks that build a
+# branch.
+for ref in $pushed; do
+  branch=${ref%:*}
+  branch=${branch#refs/heads/}
+  scanned=0
+  scripts/check-gitignore.sh "${ref#*:}" || scanned=$?
+  if [ "$scanned" -eq 1 ]; then
+    echo "pre-push: $branch tracks the ignore files above; move their entries to the root .gitignore, as above, then delete the files on that branch and amend" >&2
+    exit 1
+  elif [ "$scanned" -ne 0 ]; then
+    echo "pre-push: scripts/check-gitignore.sh stopped with exit $scanned, above, before it checked $branch" >&2
+    exit 1
+  fi
+done
 
 # mise exec runs a tool at the version mise.toml pins, also from a Git
 # client that pushes outside a shell where mise is activated.
