@@ -1,3 +1,8 @@
+# The repository's one ignore file, so that one file shows all the
+# repository ignores. An entry for what a tool writes in one folder
+# starts with that folder, as /web/dist/ does.
+# scripts/check-gitignore.sh refuses a .gitignore anywhere else.
+
 CLAUDE.local.md
 
 # Agents' drafts: commit messages, PR bodies, review notes, handoffs. A

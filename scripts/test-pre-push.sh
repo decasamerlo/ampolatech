@@ -67,6 +67,26 @@ branch scope-non-ascii
 echo probe >scripts/ação.txt
 git add -A
 git commit -q -m "chore(scripts): probe" -m "Refs: #1"
+branch gitignore-nested
+printf 'dist/\n' >web/.gitignore
+mkdir web/ação
+printf 'generated/\n' >web/ação/.gitignore
+commit_probe
+# Its first commit adds a .gitignore and its second moves the entry to
+# the root one: its new commits change docs/.gitignore, and its commit
+# holds no such file.
+branch gitignore-moved
+printf 'probe/\n' >docs/.gitignore
+commit_probe
+git rm -q docs/.gitignore
+printf '/docs/**/probe/\n' >>.gitignore
+commit_probe
+# Origin has its commit already, as after a push that skipped the hook,
+# so a push of it sends no new commit.
+branch gitignore-known
+printf 'dist/\n' >web/.gitignore
+commit_probe
+git update-ref refs/remotes/origin/gitignore-known gitignore-known
 branch java-unformatted
 printf 'final class Probe{  }\n' >backend/app/src/main/java/Probe.java
 commit_probe
@@ -183,6 +203,11 @@ expect() { # name exit pattern push-line, the pattern matched against all the ho
 expect "a push to main is refused" 1 '*main takes changes only through pull requests*' "$(push main)"
 expect "a commit message check-commits.sh refuses is refused" 1 '*commit messages above break*' "$(push bad-message)"
 expect "a scope holding a file named outside ASCII passes" 0 '*' "$(push scope-non-ascii)"
+# The refusal's own example names web/.gitignore, so the pattern matches
+# the lines that list the files, each after its commit.
+expect "a .gitignore anywhere but the root is refused, each one named" 1 '*: web/.gitignore*: web/ação/.gitignore*gitignore-nested tracks*on that branch and amend' "$(push gitignore-nested)"
+expect "a .gitignore a later commit moves to the root passes with nothing printed" 0 '' "$(push gitignore-moved)"
+expect "a .gitignore on a branch at a commit origin has is refused" 1 '*: web/.gitignore*gitignore-known tracks*on that branch and amend' "$(push gitignore-known)"
 expect "Java google-java-format would change is refused" 1 '*fails the format check*' "$(push java-unformatted)"
 expect "Java google-java-format leaves alone passes" 0 '*' "$(push java-formatted)"
 expect "a build Gradle can't configure is refused as not format-checked" 1 '*Gradle stopped on build-unconfigurable before it ran the format check*' "$(push build-unconfigurable)"
