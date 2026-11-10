@@ -190,14 +190,18 @@ for ref in $pushed; do
       exit 1
     fi
   fi
-  # The test's fixtures change scripts/ but never these paths, so the
-  # hook it runs doesn't run the test again.
-  if printf '%s\n' "$changed" | grep -Eq '^\.githooks/|^scripts/test-pre-push\.sh$'; then
+  # .githooks/ and scripts/ hold the hook and every script it runs, the
+  # backend's and the web app's builds aside, so a change to either runs
+  # the test, with no list of those scripts to change when the hook runs
+  # a new one. The test pushes its fixture branches from a repository
+  # whose scripts/test-pre-push.sh is a double, so a fixture that changes
+  # either folder runs a double, not the test again.
+  if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"
     tested=0
     "$work/$sha/scripts/test-pre-push.sh" "$sha" || tested=$?
     if [ "$tested" -eq 1 ]; then
-      echo "pre-push: $branch's hook fails the cases above; fix the hook or the case on that branch and amend" >&2
+      echo "pre-push: $branch's hook fails the cases above; fix the hook, a script it runs or the case on that branch and amend" >&2
       exit 1
     elif [ "$tested" -ne 0 ]; then
       echo "pre-push: scripts/test-pre-push.sh did not test $branch's hook, above; rebase the branch onto main when it predates the script" >&2
