@@ -1,8 +1,9 @@
 #!/bin/sh
 # Tests .githooks/pre-push as a commit holds it. It builds a throwaway
-# repository from the commit's tree, with origin/main at it, and feeds
-# the hook a push of one fixture branch per case in "Protecting main" in
-# docs/conventions/git.md, matching the exit and what the hook printed.
+# repository from the commit's tree, with origin/main at it and a double
+# in place of this script, and feeds the hook a push of one fixture
+# branch per case in "Protecting main" in docs/conventions/git.md,
+# matching the exit and what the hook printed.
 #
 #   scripts/test-pre-push.sh [<commit>]    # HEAD by default
 #
@@ -42,6 +43,15 @@ unset $(git rev-parse --local-env-vars)
 export GIT_AUTHOR_NAME=test-pre-push GIT_AUTHOR_EMAIL=test-pre-push@example.invalid
 export GIT_COMMITTER_NAME=test-pre-push GIT_COMMITTER_EMAIL=test-pre-push@example.invalid
 cd "$work"
+# The hook runs scripts/test-pre-push.sh from the commit it pushes, and
+# each fixture branch starts from a main holding this double, so on one
+# that changes .githooks/ or scripts/ the hook runs the double, not the
+# test again inside itself. The double prints the commit it is given, so
+# a case can check that the hook ran the test on the branch's commit.
+cat >scripts/test-pre-push.sh <<'EOF'
+#!/bin/sh
+echo "test-pre-push double: given $1"
+EOF
 git init -q -b main
 # Git's default, which a user's config can turn off. The cases with a
 # file named outside ASCII need git to quote that name, so they show
@@ -174,6 +184,20 @@ commit_probe
 branch mise-pins
 echo '# probe' >>mise.toml
 commit_probe
+branch hook-comment
+echo '# probe' >>.githooks/pre-push
+commit_probe
+branch check-commits-comment
+echo '# probe' >>scripts/check-commits.sh
+commit_probe
+# Each replaces the double with one that exits as the test does when a
+# case fails, and when it can't run.
+branch test-failing
+printf '#!/bin/sh\nexit 1\n' >scripts/test-pre-push.sh
+commit_probe
+branch test-unrun
+printf '#!/bin/sh\nexit 2\n' >scripts/test-pre-push.sh
+commit_probe
 branch unchecked
 echo probe >probe.txt
 commit_probe
@@ -232,6 +256,10 @@ expect "a change to .markdownlint-cli2.jsonc runs the lint" 0 '*lint-docs: ok*' 
 expect "a change to scripts/lint-docs.sh runs the lint" 0 '*lint-docs: ok*' "$(push lint-script)"
 expect "a change to scripts/markdownlint-cli2.sh runs the lint" 0 '*lint-docs: ok*' "$(push lint-wrapper)"
 expect "a change to mise.toml runs the lint" 0 '*lint-docs: ok*' "$(push mise-pins)"
+expect "a change to .githooks/pre-push runs the test on the branch's commit" 0 "*test-pre-push double: given $(git rev-parse refs/heads/hook-comment)*" "$(push hook-comment)"
+expect "a change to scripts/check-commits.sh runs the test on the branch's commit" 0 "*test-pre-push double: given $(git rev-parse refs/heads/check-commits-comment)*" "$(push check-commits-comment)"
+expect "a branch the test fails is refused" 1 '*fails the cases above*' "$(push test-failing)"
+expect "a branch the test can't run on is refused as not tested" 1 '*did not test*' "$(push test-unrun)"
 expect "a push that deletes a branch passes" 0 '' "(delete) $zero refs/heads/gone $(git rev-parse main)"
 expect "a change no check covers passes with nothing printed" 0 '' "$(push unchecked)"
 
