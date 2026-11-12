@@ -35,10 +35,7 @@ The verdict covers what markdownlint-cli2's own output can hide: when the linter
 
 ## What it lints
 
-Every Markdown file `.gitignore` doesn't exclude, tracked or not yet added, so a new file is linted before its first `git add`.
-
-- **`.claude/skills/` is left out.** Its skills are vendored (`skills-lock.json`) and overwritten on the next sync.
-- **What `.gitignore` excludes is left out**, such as `CLAUDE.local.md` and the drafts in `.scratch/`. `.git/info/exclude` isn't read, so a Markdown file that stays out of the lint is listed in `.gitignore`.
+Every Markdown file `.gitignore` doesn't exclude, tracked or not yet added, so a new file is linted before its first `git add`, and `CLAUDE.local.md` and the drafts in `.scratch/` are not. `.git/info/exclude` isn't read, so a Markdown file that stays out of the lint is listed in `.gitignore`.
 
 The rules are markdownlint's defaults, except:
 

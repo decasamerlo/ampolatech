@@ -5,7 +5,6 @@
   },
   "globs": ["**/*.md"],
   "gitignore": true,
-  "ignores": [".claude/skills/**"],
   "overrides": [
     {
       "filter": [".github/pull_request_template.md"],
