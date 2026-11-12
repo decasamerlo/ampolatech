@@ -33,7 +33,7 @@ Every change reaches `main` through a pull request, stacked when it depends on a
 
 ## Non-public sources
 
-AmpolaTech will be public; some codebases it draws precedent from are not. Adapted from nesto's [non-public-sources convention](https://github.com/decasamerlo/nesto/blob/main/docs/conventions/non-public-sources.md), which gives the reasoning.
+AmpolaTech is public; some codebases it draws precedent from are not. Adapted from nesto's [non-public-sources convention](https://github.com/decasamerlo/nesto/blob/main/docs/conventions/non-public-sources.md), which gives the reasoning.
 
 - **Verify before naming.** Any repository named in published text must be public: `gh repo view <owner>/<repo> --json isPrivate`, reject on `true`. Read the field: an agent runs authenticated as the author, so a lookup of a private repository succeeds like any other.
 - **Cite by shape, never by measurement.** Never publish identifiers, verbatim quotation, or counts of implementations, services, or references taken from a non-public codebase. State precedent as direction only: "the dominant approach", "a minority pattern".
