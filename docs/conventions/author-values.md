@@ -1,6 +1,6 @@
 # The author's values
 
-How an agent weighs one way of doing something against another: a layout, a tool, a library, a place for code, a fix. It applies when an agent makes a choice, recommends one, or reviews a change. The author makes the decisions; this convention says which option an agent puts forward, and when it takes one without asking.
+How an agent weighs one way of doing something against another: a layout, a tool, a library, a place for code, a fix, a domain restriction. It applies when an agent makes a choice, recommends one, or reviews a change. The author makes the decisions; this convention says which option an agent puts forward, and when it takes one without asking.
 
 ## The values
 
@@ -63,6 +63,8 @@ An agent takes the more correct option without stopping when the values settle t
 - the choice is hard to reverse, the kind an ADR records;
 - the choice is a name or a shape a client sees and the issue leaves it open, such as a schema in the API's spec ([api.md](api.md)).
 
+**A domain restriction counts as assumed** until a pharmacy or a regulation confirms it, whether a spec, the glossary or the code states it. For an assumed restriction, an agent recommends the permissive option and says what tightening it later would cost. A spec, an issue or a design an agent drafts or reviews marks each restriction it states as confirmed or assumed. The author wants the first pharmacy to see a working app before the domain model takes on a restriction no pharmacy has confirmed, and accepts dropping the database or rewriting code to add one later, while no pharmacy's data is stored.
+
 ## In review
 
 A reviewer weighs its own suggested fixes by this convention. In a diff, it flags these as judgement calls:
@@ -80,3 +82,4 @@ It reports a misleading name as a defect rather than a judgement call, fixed in 
 - **Records.** The language generates a record's accessors, `equals`, `hashCode` and `toString` the same way every time: a default that never varies.
 - **TanStack Router over the more widely used React Router** ([ADR 0002](../adr/0002-stack.md)): newer, stable and maintained, with type-checked routes and search params.
 - **OpenAPI 3.1, not 3.2.** 3.2 is the newest version of the specification, but the pinned openapi-generator rejects it ([API contract research](../research/api-contract.md)), so it fails the test of working with the pinned versions.
+- **An order apart from its prescription.** No pharmacy had said whether an order needs its prescription, so #111 let the two exist apart: an order may carry the prescription it was registered from.
