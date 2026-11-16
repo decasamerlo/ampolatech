@@ -29,7 +29,7 @@ A driving adapter is tested there too, with the framework running: sign-in and t
 
 A browser test, in `web/e2e/`, opens the app at nginx's port with Playwright and checks what a user sees there, through the page alone.
 
-- **The whole stack, fresh.** Playwright's global setup starts `compose.yaml`'s stack on an empty database, under a Compose project and ports of its own, `ampolatech-e2e` (`web/e2e/stack.ts`), so it runs beside the stack `docker compose up` runs, and its global teardown removes it, volume included.
+- **The whole stack, fresh.** Playwright's global setup starts `compose.yaml`'s stack on an empty database, under a Compose project and ports of its own, `ampolatech-e2e` (`web/e2e/stack.ts`), so it runs beside the stack `docker compose up` runs. Its global teardown, which runs after a failed setup too, writes the stack's logs to `web/test-results/stack.log`, then removes the stack, volume included.
 - **The demo sign-in.** Every test runs as the user the local profile seeds, whom the demo sign-in signs everyone in as, and expects that seed's values.
 - **Two projects, both Chromium**, the engine of the Chrome and Edge [ADR 0001](../adr/0001-hosted-web-app.md) names: Desktop Chrome, and Playwright's Galaxy Tab S9, an Android tablet 640 px wide, until the first pharmacy's tablet model is known.
 - **Run by hand**, with `pnpm test:e2e` in `web/`, until CI (#10) runs it. It needs Docker.
