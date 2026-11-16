@@ -6,8 +6,10 @@
 #   scripts/lint-docs.sh
 #
 # Exits 0 when every file passes, 1 when any fails, and 2 when it can't
-# run, and its last line is its own verdict. docs/conventions/markdown.md
-# says how to read the result and how to bump the version.
+# run, and its last line is its own verdict. A pass prints the verdict
+# alone; any other verdict comes below what scripts/markdownlint-cli2.sh
+# printed, when it ran. docs/conventions/markdown.md says how to read
+# the result and how to bump the version.
 set -eu
 
 verdict() { # exit-code message
@@ -20,21 +22,25 @@ cd "$(dirname "$0")/.."
 
 status=0
 report=$(scripts/markdownlint-cli2.sh </dev/null 2>&1) || status=$?
-printf '%s\n' "$report"
+
+report_then_verdict() { # exit-code message
+  printf '%s\n' "$report"
+  verdict "$1" "$2"
+}
 
 # When the wrapper refuses to start the linter, its last line gives why.
 refusal=$(printf '%s\n' "$report" | sed -n '$s/^markdownlint-cli2\.sh: could not run: //p')
-[ -z "$refusal" ] || verdict 2 "could not run: $refusal"
+[ -z "$refusal" ] || report_then_verdict 2 "could not run: $refusal"
 
 # markdownlint-cli2 exits 0 when it lints no file at all, as when the
 # globs match nothing, so the count it prints decides first.
 file_count=$(printf '%s\n' "$report" | sed -n 's/^Linting: \([0-9][0-9]*\) files\{0,1\}$/\1/p')
 case $file_count in
-  '') verdict 2 "could not run: scripts/markdownlint-cli2.sh exited $status before linting any file, above" ;;
-  0) verdict 2 "could not run: no file linted; check the Finding line above against .markdownlint-cli2.jsonc" ;;
+  '') report_then_verdict 2 "could not run: scripts/markdownlint-cli2.sh exited $status before linting any file, above" ;;
+  0) report_then_verdict 2 "could not run: no file linted; check the Finding line above against .markdownlint-cli2.jsonc" ;;
 esac
 case $status in
   0) verdict 0 "ok, $file_count files" ;;
-  1) verdict 1 "$(printf '%s\n' "$report" | sed -n 's/^Summary: //p'), above" ;;
-  *) verdict 2 "could not run: markdownlint-cli2 stopped with exit $status, above" ;;
+  1) report_then_verdict 1 "$(printf '%s\n' "$report" | sed -n 's/^Summary: //p'), above" ;;
+  *) report_then_verdict 2 "could not run: markdownlint-cli2 stopped with exit $status, above" ;;
 esac
