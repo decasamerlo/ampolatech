@@ -10,7 +10,7 @@ scripts/lint-docs.sh
 
 Run it before committing Markdown, and commit once it exits 0. It takes no arguments, since the config names the files, and lints the same files from any directory. `.githooks/pre-push` runs it too, in the cases [git.md](git.md) lists under *Protecting `main`*.
 
-Its verdict, the exit code and the last line, is the whole result:
+Its verdict, the exit code and the last line, is the whole result, and a pass prints nothing else:
 
 | Exit | Last line | Then |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ The rules are markdownlint's defaults, except:
 - **MD024 (duplicate headings) flags only siblings**, so a research note can repeat `### Assessment` under each option.
 - **MD041 (the first line is a heading) is off for `.github/pull_request_template.md` alone**, which opens with the PR's issue line. Every other rule checks it.
 
-**Changing the config.** It names the files as well as the rules, so the check and `--fix` lint the same files by the same rules. After a change, read the `Finding:` line the check prints: a misspelt key, such as `ignore` for `ignores`, is skipped without a warning.
+**Changing the config.** It names the files as well as the rules, so the check and `--fix` lint the same files by the same rules. After a change, run `scripts/markdownlint-cli2.sh` and read the `Finding:` line it prints: a misspelt key, such as `ignore` for `ignores`, is skipped without a warning. A passing check leaves that line out.
 
 ## The version is pinned
 
