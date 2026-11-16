@@ -13,11 +13,20 @@ export const ports = { web: 28081, backend: 28080, postgres: 25432 };
 
 /** Runs `docker compose` on the tests' stack, its ports set here whatever the shell holds. */
 export function compose(...args: string[]): void {
+	dockerCompose("inherit", args);
+}
+
+/** Runs `docker compose` on the tests' stack as `compose` does, writing its output to the open file `fd`. */
+export function composeInto(fd: number, ...args: string[]): void {
+	dockerCompose(fd, args);
+}
+
+function dockerCompose(stdout: "inherit" | number, args: string[]): void {
 	execFileSync(
 		"docker",
 		["compose", "--file", composeFile, "--project-name", project, ...args],
 		{
-			stdio: "inherit",
+			stdio: ["inherit", stdout, "inherit"],
 			env: {
 				...process.env,
 				AMPOLATECH_WEB_PORT: String(ports.web),

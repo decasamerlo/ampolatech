@@ -58,6 +58,11 @@ pnpm test:e2e
 
 It runs the tests in `e2e/` against the whole app, built and started fresh beside the stack `docker compose up` runs, under a Compose project and ports of its own (`e2e/stack.ts`), and removes it afterwards. [testing.md](../docs/conventions/testing.md) says what a test there uses.
 
+A run leaves its record in two folders, which the next run replaces:
+
+- `test-results/`: `stack.log`, the logs of the stack's containers, and each failed test's trace, which `pnpm exec playwright show-trace <trace.zip>` opens.
+- `playwright-report/`: the HTML report, with each failed test's error and trace, which `pnpm exec playwright show-report` opens.
+
 ## Generated code
 
 `pnpm generate` writes two things, and neither is committed (ADR 0006):
