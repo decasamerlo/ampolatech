@@ -62,7 +62,7 @@ gh stack submit --auto                 # push, and open one PR per layer
 ```
 
 - **Name the branch** in `gh stack add`: without a name it prompts, and outside a terminal it fails.
-- **`gh stack submit --auto` opens new PRs as drafts**, titled with the commit subject. Set each body with `gh pr edit <n> --body-file <file>`, then `gh pr ready <n>`.
+- **`gh stack submit --auto` opens new PRs as drafts**, titled with the commit subject. Set each body with `gh pr edit <n> --body-file <file>`, check it as *Conventions* in [issue-tracker.md](../agents/issue-tracker.md) says, then `gh pr ready <n>`.
 - **Move a stack branch only with `gh stack`** (`rebase`, `sync`). Each branch records its parent's tip, so a branch moved by `git rebase` or `git reset --hard` restacks into conflicts. After amending a lower layer, `gh stack rebase --no-trunk` moves the layers above onto it.
 - The tracking lives in `.git/gh-stack`; nothing about the stack is committed.
 
