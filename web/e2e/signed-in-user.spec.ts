@@ -7,7 +7,9 @@ test("the layout shows the signed-in user's name, roles and pharmacy", async ({
 }) => {
 	await page.goto("/orders");
 
-	await expect(page.getByRole("heading", { name: "Pedidos" })).toBeVisible();
+	await expect(
+		page.getByRole("heading", { name: "Pedidos, red run" }),
+	).toBeVisible();
 	const header = page.getByRole("banner");
 	await expect(
 		header.getByText("Joana Exemplo", { exact: true }),

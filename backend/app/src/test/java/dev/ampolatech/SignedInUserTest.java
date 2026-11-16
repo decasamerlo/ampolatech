@@ -30,7 +30,7 @@ class SignedInUserTest extends HttpSeamTest {
         .json(
             """
             {
-              "name": "Beatriz Lima",
+              "name": "Beatriz Lima, red run",
               "roles": ["PHARMACIST"],
               "pharmacy": {"name": "Farmácia Primavera"}
             }
