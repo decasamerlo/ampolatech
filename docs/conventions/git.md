@@ -8,6 +8,7 @@ How changes reach `main`: branch names, commits, pull requests, and GitHub's nat
 2. **One PR, one commit.** Amend instead of adding a commit; squash merge makes that commit the one on `main`.
 3. **A PR changes up to ~400 lines.** A bigger one says why in its Summary, such as generated code or a research note read as a whole; anything else is split into smaller PRs, stacked where one depends on another.
 4. **Only the author merges.** An agent merges only when asked to in the session.
+5. **An agent pushes its work without asking.** Once its review is clean, an agent that implements an issue pushes its branch and opens its PR, or submits its stack, and reports each PR's link. An amend to an open PR, one that answers a review included, goes up the same way once its own review is clean: `git push --force-with-lease --force-if-includes` for a lone PR, `gh stack submit` for a stack. The PR is where the author reviews the change, and the merge stays theirs (rule 4). Each push goes through `.githooks/pre-push`: skipping it with `--no-verify` is the author's call (*Protecting `main`*).
 
 ## Vocabulary
 
