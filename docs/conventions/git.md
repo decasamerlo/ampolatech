@@ -84,7 +84,7 @@ An agent asked to merge runs `gh stack merge <pr> --yes --squash`, which merges 
 
 ## Protecting `main`
 
-The repository is public, and on GitHub the ruleset `main-protection` guards `main`. It requires a pull request but no approval, since the author can't approve their own PR, and an approval rule would force every layer out of its stack to merge, as it does in nesto. It takes squash merges only, refuses a force-push and the deletion of `main`, and has no bypass, so it binds the author too. The repository's settings also allow squash merge only, and delete a PR's branch once it merges.
+The repository is public, and on GitHub the ruleset `main-protection` guards `main`. It requires a pull request but no approval, since the author can't approve their own PR, and an approval rule would force every layer out of its stack to merge, as it does in nesto. It takes squash merges only, refuses a force-push and the deletion of `main`, and has no bypass, so it binds the author too. It also requires CI's three jobs to pass (below). The repository's settings also allow squash merge only, and delete a PR's branch once it merges.
 
 Before a push leaves the machine, `.githooks/pre-push` refuses it when:
 
@@ -99,3 +99,5 @@ Before a push leaves the machine, `.githooks/pre-push` refuses it when:
 - a branch whose new commits change `.githooks/` or `scripts/` fails `scripts/test-pre-push.sh`, which pushes a fixture branch through the branch's hook for each case in this list. A new check comes with its fixtures there.
 
 A branch's checks read its commit from Git, exported where a check reads files, so the checkout and what isn't committed play no part, and a check whose tool didn't run refuses the push too. Turn the hook on once per clone with `git config core.hooksPath .githooks`. A refused push is fixed and pushed again; `git push --no-verify` skips the hook, deliberately, and is the author's call.
+
+CI, in `.github/workflows/ci.yml`, runs on each pull request, whatever it changes, and on each commit `main` gets, in three jobs: `backend`, `web` and `repository`. It runs every check in the list above but the refusal of a push to `main`, and every test, the HTTP tests and the browser tests among them, which the hook leaves out. On a pull request, it runs on the merge GitHub builds of the pull request into its base, the tree that would land, and checks the messages of the commits the pull request brings; on `main`, where the commits are history, it leaves the messages alone. A failed `backend` keeps its test reports as an artifact of the run, and a failed `web` keeps the browser tests' report, traces and `stack.log`.

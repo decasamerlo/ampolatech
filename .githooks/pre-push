@@ -147,8 +147,9 @@ for ref in $pushed; do
         '^> There were [0-9]+ lint error' \
         "fails the format check above: google-java-format can't parse the Java it names; fix that Java on the branch and amend"
     # ArchitectureTest holds the boundaries that the compiler doesn't
-    # (ADR 0007), and unlike the HTTP tests it needs no Docker.
-    # TODO(#10): CI runs it, with every other test.
+    # (ADR 0007). CI runs it with every other test, but unlike the HTTP
+    # tests it needs no Docker, so a broken boundary is refused here,
+    # before a CI run is spent on it.
     gradle_on "$sha" :app:test --tests dev.ampolatech.ArchitectureTest ||
       refuse_after_gradle "$branch" "the architecture test" \
         '^> There were failing tests' \

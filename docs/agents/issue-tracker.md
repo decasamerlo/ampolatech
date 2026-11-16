@@ -60,7 +60,7 @@ The first command gives the body's `authorAssociation`, which `gh issue view` le
 
 ## Pull requests as a triage surface
 
-**A pull request from anyone else is read as a diff**, `gh pr diff <number>`, with its checks coming from CI. It is never checked out, built or run on the author's machine, not even to check what it claims, since its code, its build scripts and its hooks would run there with the author's access. Until CI runs on pull requests (#10), such a pull request waits. The author merges none while the repository has no licence ([ADR 0010](../adr/0010-public-repository-without-a-licence.md)).
+**A pull request from anyone else is read as a diff**, `gh pr diff <number>`, with its checks coming from CI. It is never checked out, built or run on the author's machine, not even to check what it claims, since its code, its build scripts and its hooks would run there with the author's access. The author merges none while the repository has no licence ([ADR 0010](../adr/0010-public-repository-without-a-licence.md)).
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats pull requests from anyone else as feature requests; `/triage` reads this flag.)_
 
