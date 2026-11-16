@@ -16,7 +16,7 @@ An adapter's package is `adapter.{in,out}.{category}.{implementation}`: its dire
 - **An allow-list for each adapter category** (`onlyDependOnClassesThat()`), in place of its module's classpath, since a deny-list lets through whatever it forgets to name. Each list names packages one by one, as [hexagonal.md](../conventions/hexagonal.md) says, because a root lets in more than one technology: `java..` holds `java.sql`, and `org.springframework.boot..` holds Boot's JDBC, JPA and web MVC support alike. The driving adapters list no driven port, so a driving adapter reaches the database or a driven port only through the application.
 - **An allow-list for the domain, the ports and the services**, of `core`'s packages and the JDK packages the adapters' lists name. The module per layer had none, and the guarantee [ADR 0002](0002-stack.md) names, no framework or database in them, needs one: it refuses `java.sql`, JDBC's API, which compiles in `core`.
 
-A broken boundary shows at test time, not at compile time: the code compiles, and `./gradlew build` fails on `app`'s tests. No CI runs the tests yet (#10), so `.githooks/pre-push` runs `ArchitectureTest`, which needs no database, on a push that changes `backend/`.
+A broken boundary shows at test time, not at compile time: the code compiles, and `./gradlew build` fails on `app`'s tests. CI runs every test on each pull request ([git.md](../conventions/git.md)), and `.githooks/pre-push` runs `ArchitectureTest`, which needs no database, on a push that changes `api/` or `backend/`, so a broken boundary is refused before a CI run is spent on it.
 
 ## Considered options
 

@@ -1,0 +1,168 @@
+# Every check and test the repository has. docs/conventions/git.md says what
+# each check refuses, and that the ruleset on main requires the three jobs to
+# pass.
+#
+# Each action is pinned by its commit SHA, which names one commit for good,
+# where a tag can be moved to another; its version is in the comment beside
+# it.
+name: CI
+
+on:
+  # No branch filter: every pull request runs, whatever its base, a stack's
+  # upper layers included.
+  pull_request:
+  # A run on main writes the caches every pull request reads, since
+  # setup-gradle writes its cache only from the default branch. It also shows
+  # whether main passes once a squash merge lands on a main that moved.
+  push:
+    branches: [main]
+
+# Each job's token only reads the repository, no job reads a secret, and no
+# checkout leaves the token on disk, so a pull request whose new dependency
+# installs and runs here finds no credential that writes to the repository.
+permissions: {}
+
+# A pull request's new push cancels its run in progress. Each run on main is
+# a group of its own, so none cancels another.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # mise's downloads rather than its installs: mise checks a download
+      # against mise.lock's checksum on each install, and trusts a restored
+      # install as it is (https://mise.jdx.dev/continuous-integration.html).
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/mise/downloads-cas
+          key: mise-downloads-${{ runner.os }}-${{ hashFiles('mise.lock') }}
+      # Every tool mise.toml pins, on PATH, with JAVA_HOME set to the pinned
+      # JDK, which ./gradlew runs on.
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+          install_args: --locked
+          cache: false
+      # The basic provider is the open-source one, on the Actions cache; the
+      # default, enhanced, is a commercial service under Gradle's terms of use.
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+      # build runs spotlessCheck and bootJar, which test skips, and every
+      # test: ArchitectureTest, and the HTTP tests against PostgreSQL in
+      # Testcontainers.
+      - name: Build and test the backend
+        working-directory: backend
+        run: ./gradlew build
+      - name: Keep the test reports
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-test-reports
+          path: backend/*/build/reports/tests/
+
+  web:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/mise/downloads-cas
+          key: mise-downloads-${{ runner.os }}-${{ hashFiles('mise.lock') }}
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+          install_args: --locked
+          cache: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate
+      - run: pnpm typecheck
+      - run: pnpm check
+      # Both projects in playwright.config.ts launch Chromium headless, which
+      # runs the headless shell alone, and a runner has neither it nor the
+      # system libraries it needs.
+      - run: pnpm exec playwright install --with-deps --only-shell chromium
+      # The global setup builds both images from the checkout and starts the
+      # whole app with `docker compose up --wait` (web/e2e/global-setup.ts).
+      - run: pnpm test:e2e
+      - name: Keep the browser tests' report, traces and the stack's log
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-test-results
+          path: |
+            web/playwright-report/
+            web/test-results/
+
+  repository:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The whole history: the commit check finds a pull request's
+          # commits through the merge's parents, and the files each commit
+          # changes through its own parent.
+          fetch-depth: 0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/mise/downloads-cas
+          key: mise-downloads-${{ runner.os }}-${{ hashFiles('mise.lock') }}
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          version: 2026.11.5
+          install_args: --locked
+          cache: false
+      # scripts/test-pre-push.sh runs Gradle on its fixtures. The last step
+      # that sets up the tools.
+      - id: tools
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-provider: basic
+      # On main, the commits are history already.
+      - name: Check the pull request's commit messages
+        if: github.event_name == 'pull_request'
+        run: |
+          # The checkout is the merge GitHub builds of the pull request into
+          # its base: the base is its first parent and the pull request's
+          # head its second, so the commits between them are the ones the
+          # pull request brings, and the merge, which GitHub wrote, is left
+          # out.
+          git log --format='%h %s' HEAD^1..HEAD^2
+          commits=$(git rev-list HEAD^1..HEAD^2)
+          # shellcheck disable=SC2086 # one word per commit
+          scripts/check-commits.sh $commits
+      # Each check below runs whatever the checks before it found, once the
+      # tools are set up, so a red run names every check that fails.
+      - name: Check that the only .gitignore is the root one
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: scripts/check-gitignore.sh HEAD
+      - name: Lint the Markdown
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: scripts/lint-docs.sh
+      - name: Run shellcheck on the hook and the scripts
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: shellcheck .githooks/* scripts/*.sh
+      - name: Test the pre-push hook
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: scripts/test-pre-push.sh HEAD
