@@ -1,6 +1,6 @@
 # Markdown
 
-How the repository's Markdown is checked: [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) at the version `mise.toml` pins, with the rules and the files in `.markdownlint-cli2.jsonc`. Adapted from nesto's [Markdown convention](https://github.com/decasamerlo/nesto/blob/main/docs/conventions/markdown.md).
+How the repository's Markdown is checked: by [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) at the version `mise.toml` pins, with the rules and the files in `.markdownlint-cli2.jsonc`, and in review against the writing-for-agents skill (*In review*). The lint is adapted from nesto's [Markdown convention](https://github.com/decasamerlo/nesto/blob/main/docs/conventions/markdown.md).
 
 ## Running the check
 
@@ -50,3 +50,17 @@ The rules are markdownlint's defaults, except:
 `mise.toml` pins markdownlint-cli2 and the Node it runs on. `mise.lock` locks Node's downloads by their checksums, and markdownlint-cli2's dependency graph, under `.mise/locks/`. A new version can add a rule or change one, and a file that passed starts failing with nobody having edited it. With the pin, those findings arrive only in the change that moves it.
 
 **To bump either pin**, in a change of its own: edit it in `mise.toml`, run `mise lock` and then the check, fix what the new version finds, and commit the pin, the lock and the fixes together once the check exits 0.
+
+## In review
+
+A review holds each Markdown file its diff writes or edits to the writing-for-agents skill, along with every other file that states the same facts. The implementer runs the skill before the review, as `CLAUDE.md` asks, but a fix made in review comes after that pass, so the review of an amend does the same over the amend's diff. Where a doc's own format differs from the skill, such as the glossary's `_Avoid_` lists, the format wins.
+
+The review's report gives one line per file it held to the skill: its finding, or none.
+
+A convention in `docs/conventions/` states the rule and the reasons that hold today. The rest goes in the commit body:
+
+- a reason since found false;
+- what an earlier version of the convention said;
+- how the rule differs from another repository's.
+
+A convention names another repository only as the source of something it adopts, as this one's opening does with nesto.

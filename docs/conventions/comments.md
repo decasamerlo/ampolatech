@@ -11,7 +11,7 @@ A comment is read in a **fresh checkout**: the repository at that commit and not
 
 Comments go on the code a change touches. A comment there that the change makes false is corrected or removed in the same change.
 
-Before the change's review, run the writing-for-agents skill over each comment the change writes or edits, and over every other place that states the same facts. Where the skill and this convention differ, this convention wins.
+Before the change's review, run the writing-for-agents skill over each comment the change writes or edits, and over every other place that states the same facts. A review holds the comments its diff writes or edits, and every other place that states the same facts, to the skill too, since a fix made in review comes after the implementer's pass. Where the skill and this convention differ, this convention wins.
 
 ## Worth a comment
 
