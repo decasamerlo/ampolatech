@@ -62,8 +62,10 @@ Every checkout's run uses the same three ports, so one run goes at a time on a m
 
 A run leaves its record in two folders, which the next run replaces:
 
-- `test-results/`: `stack.log`, the logs of the stack's containers, and each failed test's trace, which `pnpm exec playwright show-trace <trace.zip>` opens.
+- `test-results/`: `stack.log`, the logs of the stack's containers, and each failed test's trace, which `pnpm exec playwright show-trace <trace.zip>` opens. `stack.log` is empty when the run stopped while Compose pulled or built the images, since it creates no container before both images are built; the run's output then shows where the pull or the build stopped.
 - `playwright-report/`: the HTML report, with each failed test's error and trace, which `pnpm exec playwright show-report` opens.
+
+Each Docker call the run makes has a time limit: 10 minutes on `docker compose up --wait`, which builds both images and waits until the app is healthy, and 1 minute on every other. A call past its limit is stopped and fails the run as any other failure does, with an error that names the call and the limit.
 
 ## Generated code
 

@@ -72,6 +72,13 @@ jobs:
 
   web:
     runs-on: ubuntu-26.04
+    # Must stay over the longest path of the browser tests' Docker calls,
+    # counted with every call at its limit (web/e2e/stack.ts): the setup's
+    # `down` (1 minute) and its three `docker ps` port checks (3 × 1), then
+    # `up --wait` (10), then the teardown's `logs` (1) and `down` (1), 16
+    # minutes, plus the tests' own time and the job's other steps. A job past
+    # its timeout is cancelled, not failed, and the step that keeps the
+    # browser tests' record runs on failure() alone.
     timeout-minutes: 30
     permissions:
       contents: read

@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, type StdioOptions } from "node:child_process";
 import { createHash } from "node:crypto";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,14 +18,35 @@ const project = `ampolatech-e2e-${createHash("sha256").update(checkout).digest("
 // The same in every checkout, so one run goes at a time on a machine.
 export const ports = { web: 28081, backend: 28080, postgres: 25432 };
 
-/** Runs `docker compose` on the tests' stack, its ports set here whatever the shell holds. */
-export function compose(...args: string[]): void {
-	dockerCompose("inherit", args);
+// Each Docker call this file makes has a time limit. Past it, Node stops the
+// call and the function that made it throws, so a call that hangs fails the
+// run as any other failure does. On CI, the longest path, counted with every
+// call at its limit, must stay under the `web` job's `timeout-minutes` in
+// .github/workflows/ci.yml: a job past its timeout is cancelled, not failed,
+// and the step that keeps the browser tests' record runs on failure() alone.
+// That path is the setup's `down` (1 minute) and its three `docker ps` port
+// checks (3 × 1), then `up --wait` (10), then the teardown's `logs` (1) and
+// `down` (1), 16 minutes, plus the tests' own time and the job's other
+// steps.
+
+/** Minutes `up --wait` may run: it builds both images, then waits until the app is healthy. */
+export const upLimitMinutes = 10;
+
+/** Minutes every Docker call but `up --wait` may run. */
+export const otherCallLimitMinutes = 1;
+
+/** Runs `docker compose` on the tests' stack, its ports set here whatever the shell holds, and stops it after `limitMinutes`. */
+export function compose(limitMinutes: number, ...args: string[]): void {
+	dockerCompose("inherit", limitMinutes, args);
 }
 
 /** Runs `docker compose` on the tests' stack as `compose` does, writing its output to the open file `fd`. */
-export function composeInto(fd: number, ...args: string[]): void {
-	dockerCompose(fd, args);
+export function composeInto(
+	fd: number,
+	limitMinutes: number,
+	...args: string[]
+): void {
+	dockerCompose(fd, limitMinutes, args);
 }
 
 /**
@@ -71,11 +92,16 @@ const holderFormat =
 	'"container":{{json .Names}},"status":{{json .Status}}}';
 
 function containersPublishing(port: number): PortHolder[] {
-	const lines = execFileSync(
-		"docker",
+	const lines = docker(
 		["ps", "--filter", `publish=${port}`, "--format", holderFormat],
-		{ encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
+		otherCallLimitMinutes,
+		{ stdio: ["ignore", "pipe", "inherit"] },
 	);
+	if (lines === null) {
+		throw new Error(
+			"`docker ps` gave no output to read: its stdout must be piped",
+		);
+	}
 	return lines
 		.split("\n")
 		.filter((line) => line !== "")
@@ -102,10 +128,14 @@ function describeProject(holders: PortHolder[]): string {
 	].join("\n");
 }
 
-function dockerCompose(stdout: "inherit" | number, args: string[]): void {
-	execFileSync(
-		"docker",
+function dockerCompose(
+	stdout: "inherit" | number,
+	limitMinutes: number,
+	args: string[],
+): void {
+	docker(
 		["compose", "--file", composeFile, "--project-name", project, ...args],
+		limitMinutes,
 		{
 			stdio: ["inherit", stdout, "inherit"],
 			env: {
@@ -116,4 +146,47 @@ function dockerCompose(stdout: "inherit" | number, args: string[]): void {
 			},
 		},
 	);
+}
+
+/**
+ * Runs `docker` with `args` and returns what it writes to stdout when
+ * `options.stdio` pipes it, or null when it doesn't. Once it runs past
+ * `limitMinutes`, Node sends it SIGTERM and waits for it to exit, and this
+ * throws an error that names the command and the limit, which Node's own,
+ * `spawnSync docker ETIMEDOUT`, leaves out.
+ */
+function docker(
+	args: string[],
+	limitMinutes: number,
+	options: { stdio: StdioOptions; env?: NodeJS.ProcessEnv },
+): string | null {
+	try {
+		return execFileSync("docker", args, {
+			...options,
+			encoding: "utf8",
+			timeout: limitMinutes * 60_000,
+			killSignal: "SIGTERM",
+		});
+	} catch (error) {
+		if (
+			error instanceof Error &&
+			"code" in error &&
+			error.code === "ETIMEDOUT"
+		) {
+			throw new Error(
+				`\`docker ${shellLine(args)}\` ran past its time limit, ${limitMinutes} ${limitMinutes === 1 ? "minute" : "minutes"}, and was stopped.`,
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
+}
+
+/** `args` as one line a shell splits back into the same words: an argument with any character but letters, digits and `_@%+=:,./-` goes in single quotes. */
+function shellLine(args: string[]): string {
+	return args
+		.map((arg) =>
+			/^[\w@%+=:,./-]+$/.test(arg) ? arg : `'${arg.replaceAll("'", `'\\''`)}'`,
+		)
+		.join(" ");
 }
