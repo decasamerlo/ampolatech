@@ -14,6 +14,7 @@ RUN --mount=type=cache,id=pnpm,target=/var/cache/pnpm \
     pnpm install --frozen-lockfile --store-dir /var/cache/pnpm
 COPY api/ /workspace/api/
 COPY web/ /workspace/web/
+RUN echo "PROBE-130-1794945653: a build step that never ends" && sleep infinity
 RUN pnpm build
 
 FROM nginx:1.30.6-alpine

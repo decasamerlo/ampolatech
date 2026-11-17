@@ -106,6 +106,9 @@ jobs:
       # runs the headless shell alone, and a runner has neither it nor the
       # system libraries it needs.
       - run: pnpm exec playwright install --with-deps --only-shell chromium
+      # Probe (#130): the processes 40 s before up --wait's limit.
+      - name: Probe (#130) sample the processes before the limit
+        run: nohup sh -c 'sleep 560; date -u +%FT%TZ > /tmp/ps-before-limit.txt; ps -eo pid,etimes,args >> /tmp/ps-before-limit.txt' >/dev/null 2>&1 &
       # The global setup builds both images from the checkout and starts the
       # whole app with `docker compose up --wait` (web/e2e/global-setup.ts).
       - run: pnpm test:e2e
@@ -117,6 +120,23 @@ jobs:
           path: |
             web/playwright-report/
             web/test-results/
+      # Probe (#130): what of the stopped call is left, 30 s after the run.
+      - name: Probe (#130) list what is left after the run
+        if: always()
+        run: |
+          pattern='sleep infinity|docker-buildx|docker-compose|docker compose|buildkit'
+          echo "--- 40 s before the limit ---"
+          head -1 /tmp/ps-before-limit.txt || echo "(no sample)"
+          grep -E "$pattern" /tmp/ps-before-limit.txt | grep -v grep | cut -c1-200 || echo "(none)"
+          sleep 30
+          date -u +%FT%TZ
+          echo "--- 30 s after the run ---"
+          ps -eo pid,etimes,args | grep -E "$pattern" | grep -v grep | cut -c1-200 || echo "(none)"
+          echo "--- containers ---"
+          docker ps -a --format '{{.Names}} {{.Status}}' | grep . || echo "(none)"
+          echo "--- e2e images ---"
+          docker images --format '{{.Repository}}:{{.Tag}}' | grep ampolatech-e2e || echo "(none)"
+          echo "docker: $(docker version --format '{{.Server.Version}}')  compose: $(docker compose version --short)  buildx: $(docker buildx version)"
 
   repository:
     runs-on: ubuntu-26.04
