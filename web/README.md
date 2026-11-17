@@ -56,7 +56,9 @@ Then, with Docker running:
 pnpm test:e2e
 ```
 
-It runs the tests in `e2e/` against the whole app, built and started fresh beside the stack `docker compose up` runs, under a Compose project and ports of its own (`e2e/stack.ts`), and removes it afterwards. [testing.md](../docs/conventions/testing.md) says what a test there uses.
+It runs the tests in `e2e/` against the whole app, built and started fresh beside the stack `docker compose up` runs, on ports of its own and under a Compose project of this checkout's own (`e2e/stack.ts`), and removes it afterwards, its built images included. [testing.md](../docs/conventions/testing.md) says what a test there uses.
+
+Every checkout's run uses the same three ports, so one run goes at a time on a machine. When another Compose project's containers hold them, the run stops before it builds anything, with a message that names that project, the folder it was started from, how long it has been up and the command that removes it. An agent that meets that message reports the holder and stops, since a run may be under way there: removing another checkout's stack is the author's to decide.
 
 A run leaves its record in two folders, which the next run replaces:
 

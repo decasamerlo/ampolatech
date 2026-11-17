@@ -6,12 +6,14 @@ import { compose, composeInto } from "./stack";
 // Playwright runs the teardown after a failed global setup as well as after
 // the tests, and `down` deletes the containers' logs with them, so the logs
 // are written first: a failed run keeps the backend's log, even when the
-// backend failed to start.
+// backend failed to start. `--rmi local` removes the two images Compose
+// built for the project, which is this checkout's alone, so no other run
+// would remove them.
 export default function globalTeardown(config: FullConfig): void {
 	try {
 		writeStackLog(config);
 	} finally {
-		compose("down", "--volumes");
+		compose("down", "--volumes", "--rmi", "local");
 	}
 }
 
