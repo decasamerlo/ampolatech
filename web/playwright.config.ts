@@ -11,6 +11,14 @@ export default defineConfig({
 	// A test that passes on a retry hides a race, so a test that fails once
 	// fails the run, though Playwright's docs suggest two retries on CI.
 	retries: 0,
+	// Each test's limit: a test that hangs fails here, and the run goes on
+	// through the teardown and the report. No globalTimeout, Playwright's
+	// limit on a whole run, though its CI guide advises one: when it fires
+	// during a test, the run skips the global teardown, which writes stack.log
+	// and removes the stack, and it can't interrupt the global setup, whose
+	// Docker calls block. Each Docker call has a limit of its own instead
+	// (e2e/stack.ts).
+	timeout: 30_000,
 	// A failed run's record, which the next run replaces: each failed test's
 	// trace and the stack's log (e2e/global-teardown.ts) in test-results/, and
 	// the HTML report in playwright-report/.

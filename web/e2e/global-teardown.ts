@@ -1,7 +1,7 @@
 import { closeSync, mkdirSync, openSync } from "node:fs";
 import { join } from "node:path";
 import type { FullConfig } from "@playwright/test";
-import { compose, composeInto } from "./stack";
+import { compose, composeInto, otherCallLimitMinutes } from "./stack";
 
 // Playwright runs the teardown after a failed global setup as well as after
 // the tests, and `down` deletes the containers' logs with them, so the logs
@@ -13,7 +13,7 @@ export default function globalTeardown(config: FullConfig): void {
 	try {
 		writeStackLog(config);
 	} finally {
-		compose("down", "--volumes", "--rmi", "local");
+		compose(otherCallLimitMinutes, "down", "--volumes", "--rmi", "local");
 	}
 }
 
@@ -29,7 +29,13 @@ function writeStackLog(config: FullConfig): void {
 	mkdirSync(outputDir, { recursive: true });
 	const log = openSync(join(outputDir, "stack.log"), "w");
 	try {
-		composeInto(log, "logs", "--no-color", "--timestamps");
+		composeInto(
+			log,
+			otherCallLimitMinutes,
+			"logs",
+			"--no-color",
+			"--timestamps",
+		);
 	} finally {
 		closeSync(log);
 	}
