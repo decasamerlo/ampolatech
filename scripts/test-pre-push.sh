@@ -69,6 +69,9 @@ commit_probe() {
   git commit -q -m "chore: probe" -m "Refs: #1"
 }
 
+# main holds the scripts/check-commits.sh of the commit under test, so
+# that script checks this branch's message, never a double: a commit
+# that weakens its own script fails the case.
 branch bad-message
 echo probe >probe.txt
 git add -A
@@ -190,6 +193,32 @@ commit_probe
 branch check-commits-comment
 echo '# probe' >>scripts/check-commits.sh
 commit_probe
+# Its own scripts/check-commits.sh is a double that prints the commits
+# it is given, where the working tree, on main, holds the script of the
+# commit under test.
+branch check-commits-double
+printf '#!/bin/sh\necho "check-commits double: given $*"\n' >scripts/check-commits.sh
+commit_probe
+# Its first two commits hold the script of the commit under test and a
+# message it refuses, and its third the double.
+branch check-commits-per-commit
+echo one >probe.txt
+git add -A
+git commit -q -m "Probe one"
+echo two >probe.txt
+git add -A
+git commit -q -m "Probe two"
+printf '#!/bin/sh\necho "check-commits double: given $*"\n' >scripts/check-commits.sh
+commit_probe
+branch check-commits-missing
+git rm -q scripts/check-commits.sh
+commit_probe
+branch check-gitignore-double
+printf '#!/bin/sh\necho "check-gitignore double: given $*"\n' >scripts/check-gitignore.sh
+commit_probe
+branch check-gitignore-missing
+git rm -q scripts/check-gitignore.sh
+commit_probe
 # Each replaces the double with one that exits as the test does when a
 # case fails, and when it can't run.
 branch test-failing
@@ -258,6 +287,11 @@ expect "a change to scripts/markdownlint-cli2.sh runs the lint" 0 '*lint-docs: o
 expect "a change to mise.toml runs the lint" 0 '*lint-docs: ok*' "$(push mise-pins)"
 expect "a change to .githooks/pre-push runs the test on the branch's commit" 0 "*test-pre-push double: given $(git rev-parse refs/heads/hook-comment)*" "$(push hook-comment)"
 expect "a change to scripts/check-commits.sh runs the test on the branch's commit" 0 "*test-pre-push double: given $(git rev-parse refs/heads/check-commits-comment)*" "$(push check-commits-comment)"
+expect "a branch's own scripts/check-commits.sh checks its commit" 0 "*check-commits double: given $(git rev-parse refs/heads/check-commits-double)*" "$(push check-commits-double)"
+expect "each new commit's message is checked by that commit's scripts/check-commits.sh, every breach printed before the refusal" 1 "*$(git rev-parse --short check-commits-per-commit~2): subject*$(git rev-parse --short check-commits-per-commit~1): subject*check-commits double: given $(git rev-parse refs/heads/check-commits-per-commit)*commit messages above break*" "$(push check-commits-per-commit)"
+expect "a branch without scripts/check-commits.sh is refused, the rebase named" 1 '*check-commits-missing*has no scripts/check-commits.sh*rebase the branch onto main*' "$(push check-commits-missing)"
+expect "a branch's own scripts/check-gitignore.sh checks its commit" 0 "*check-gitignore double: given $(git rev-parse refs/heads/check-gitignore-double)*" "$(push check-gitignore-double)"
+expect "a branch without scripts/check-gitignore.sh is refused, the rebase named" 1 '*check-gitignore-missing*has no scripts/check-gitignore.sh*rebase the branch onto main*' "$(push check-gitignore-missing)"
 expect "a branch the test fails is refused" 1 '*fails the cases above*' "$(push test-failing)"
 expect "a branch the test can't run on is refused as not tested" 1 '*did not test*' "$(push test-unrun)"
 expect "a push that deletes a branch passes" 0 '' "(delete) $zero refs/heads/gone $(git rev-parse main)"

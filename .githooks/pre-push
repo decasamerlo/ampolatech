@@ -17,18 +17,48 @@ while read -r local_ref local_sha remote_ref _; do
 done
 
 [ -n "$pushed" ] || exit 0
-commits=$(for ref in $pushed; do git rev-list "${ref#*:}" --not --remotes=origin; done | sort -u)
 
-checked=0
-if [ -n "$commits" ]; then
-  # shellcheck disable=SC2086 # one word per commit
-  scripts/check-commits.sh $commits || checked=$?
-fi
-if [ "$checked" -eq 1 ]; then
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+trap 'exit 1' HUP INT TERM
+
+# A check runs the script of the commit it checks, taken from Git, since
+# the working tree's copy can belong to another branch or hold an edit
+# that isn't committed. The script is taken alone, into a folder apart
+# from $work/<commit>, which the loop that builds a branch reads as that
+# commit having passed.
+take_script() { # branch commit script
+  if ! git cat-file -e "$2:scripts/$3" 2>/dev/null; then
+    echo "pre-push: $1's commit $(git rev-parse --short "$2^{commit}") has no scripts/$3 for the hook to run on it; rebase the branch onto main when it predates the script" >&2
+    exit 1
+  fi
+  mkdir -p "$work/taken/$2"
+  git archive "$2" "scripts/$3" | tar -x -C "$work/taken/$2"
+}
+
+breached=0
+seen=""
+for ref in $pushed; do
+  branch=${ref%:*}
+  branch=${branch#refs/heads/}
+  for commit in $(git rev-list --reverse "${ref#*:}" --not --remotes=origin); do
+    case " $seen " in
+      *" $commit "*) continue ;; # a ref before this one sends it too
+      *) seen="$seen $commit" ;;
+    esac
+    take_script "$branch" "$commit" check-commits.sh
+    checked=0
+    "$work/taken/$commit/scripts/check-commits.sh" "$commit" || checked=$?
+    if [ "$checked" -eq 1 ]; then
+      breached=1 # the refusal comes once every commit's breaches are printed
+    elif [ "$checked" -ne 0 ]; then
+      echo "pre-push: scripts/check-commits.sh stopped with exit $checked, above, before it checked the message of $branch's commit $(git rev-parse --short "$commit")" >&2
+      exit 1
+    fi
+  done
+done
+if [ "$breached" -eq 1 ]; then
   echo "pre-push: the commit messages above break docs/conventions/git.md; amend them" >&2
-  exit 1
-elif [ "$checked" -ne 0 ]; then
-  echo "pre-push: scripts/check-commits.sh stopped with exit $checked, above, before it checked every message" >&2
   exit 1
 fi
 
@@ -36,13 +66,15 @@ fi
 # commits, since only that commit's tree reaches main: a branch whose
 # later commit moves a nested .gitignore's entries to the root one
 # passes, and a branch at a commit origin already has is read too. It
-# needs no export or tool, so it refuses before the checks that build a
-# branch.
+# needs that commit's script alone, with no export of the commit and no
+# tool, so it refuses before the checks that build a branch.
 for ref in $pushed; do
   branch=${ref%:*}
   branch=${branch#refs/heads/}
+  sha=${ref#*:}
+  take_script "$branch" "$sha" check-gitignore.sh
   scanned=0
-  scripts/check-gitignore.sh "${ref#*:}" || scanned=$?
+  "$work/taken/$sha/scripts/check-gitignore.sh" "$sha" || scanned=$?
   if [ "$scanned" -eq 1 ]; then
     echo "pre-push: $branch tracks the ignore files above; move their entries to the root .gitignore, as above, then delete the files on that branch and amend" >&2
     exit 1
@@ -61,10 +93,6 @@ pinned() {
     "$@"
   fi
 }
-
-work=$(mktemp -d)
-trap 'rm -rf "$work"' EXIT
-trap 'exit 1' HUP INT TERM
 
 # The checks read files, so they run on the pushed commit exported from
 # Git: the working tree holds one branch of the push at most, with what
