@@ -40,6 +40,14 @@ String[] activeProfiles = environment.getActiveProfiles();              // no na
 - **Names are whole words**, taken from the glossary or the discipline: `pharmacyId`, never `phId`. A method's name and parameters tell a reader what it does without opening it. Google Java Style covers the rest, from the prefixes it forbids (`mName`) to underscores in test method names.
 - **A class is referred to by its simple name, through an import.** When two classes in one file share a simple name, the one the file mentions less is written fully qualified.
 
+## Lombok
+
+**The backend uses Lombok, in `core` and `app`** ([ADR 0011](../adr/0011-lombok-in-both-backend-modules.md)). Any of its annotations may be used, and review decides case by case.
+
+- **A generated constructor takes the fields in the order the class declares them** ([Lombok's rule](https://projectlombok.org/features/constructor)). Moving a field moves its parameter in every `new` of the class, and two fields of one type, swapped, still compile.
+- **A generated member takes the access a hand-written one would have**, named in its annotation. Lombok generates `public` unless the annotation says otherwise, so in a package-private class the constructor and the getters say `AccessLevel.PACKAGE`, as `UserPostgresqlRepository`'s constructor and `UserEntity`'s getters do, and a JPA entity's no-argument constructor says `AccessLevel.PROTECTED`.
+- **A layer's first class to use Lombok adds `"lombok"` to that layer's allow-list in `ArchitectureTest`**, in the same change ([hexagonal.md](hexagonal.md)): the rule otherwise fails on `lombok.Generated`, which Lombok puts on what it generates.
+
 ## Sources
 
 - [Google Java Style](https://google.github.io/styleguide/javaguide.html): braces (§4.1.1), overloads (§3.4.2.1) and naming (§5). Its §3.4.2 leaves member order to each class; the order above is this repository's.

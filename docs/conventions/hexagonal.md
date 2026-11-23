@@ -6,7 +6,7 @@ Where the backend's code lives, how its ports are named, and who implements them
 
 | Module | Packages, under `dev.ampolatech` | Depends on |
 | --- | --- | --- |
-| `core` | `domain`, `port.in`, `port.out`, `application` | No module and no library |
+| `core` | `domain`, `port.in`, `port.out`, `application` | No module, and one library, Lombok, at compile time only ([ADR 0011](../adr/0011-lombok-in-both-backend-modules.md)) |
 | `app` | the composition root, in the package `dev.ampolatech` itself, and the adapters, in `adapter..` | `core` and the libraries the adapters use |
 
 - **An adapter's package is `adapter.{in,out}.{category}.{implementation}`**: its direction, what it does, and which one it is, such as `adapter.in.web.rest`, `adapter.in.signin.demo` and `adapter.out.persistence.postgresql`. The implementation is written even when it is the only one, so a second never moves the first.
@@ -19,7 +19,7 @@ Where the backend's code lives, how its ports are named, and who implements them
 - **A new adapter category gets its own layer and allow-list in `ArchitectureTest`**, in the change that adds it. Every class must sit in a layer, so the test fails until then.
 - **An allow-list names the packages its classes use, one by one, and grows a package at a time**, in the change that needs it, where review sees it, never by a root such as `org.springframework..`. Only the repository's own packages and the JDK's `java.lang`, `java.util`, `java.time` and `java.math` take the `..` that covers the packages below them: a root lets in more than one technology, as `java..` holds `java.sql` and `org.springframework.boot..` holds Boot's JDBC and web support alike.
 - **`scripts/architecture-violations.sh` reads a failed run's report**: for each rule that failed, every package its violations reach, with the classes that reach it, one line per package, so a package an allow-list lacks reads at a glance.
-- **The domain, the ports and the services share one allow-list**, of `core`'s packages and those four of the JDK. Every module compiles against the whole JDK, so it is this list, not `core`'s classpath, that stops them from using `java.sql` or `java.net.http`.
+- **The domain, the ports and the services share one allow-list**, of `core`'s packages, those four of the JDK and `lombok` (ADR 0011). Every module compiles against the whole JDK, so it is this list, not `core`'s classpath, that stops them from using `java.sql` or `java.net.http`.
 - **A new or changed rule goes red before it lands**, since a rule passes on clean code whether or not it catches anything. An allow-list growing by a package is left to review, as above.
 
   1. In a production package the rule covers, add a class that breaks what the change adds; `ArchitectureTest` leaves the test sources out.
@@ -67,7 +67,7 @@ A method's prefix says what absence means, in driving and driven ports alike:
 
 ### Who implements a driving port
 
-**The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in `core`'s `application` package: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `core`, it depends on no framework, so it carries no annotation and the composition root builds it.
+**The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in `core`'s `application` package: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `core`, it depends on no framework, so it carries no framework's annotation and the composition root builds it.
 
 **An operation writes through one driven port.** Its write then needs no transaction beyond the one its adapter runs, and no application service opens one. An operation that would write through two needs a decision first on where its transaction begins, since an application service can't carry Spring's `@Transactional` ([ADR 0007](../adr/0007-backend-modules.md)); #105 weighs the options.
 

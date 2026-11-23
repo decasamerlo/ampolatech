@@ -42,7 +42,7 @@ An editor formats the way the build checks when it runs google-java-format's com
 
 | Module | Holds |
 | --- | --- |
-| `core` | The domain types, the ports and the application services, in plain Java. `app`'s `ApplicationServiceConfiguration` builds the services as beans. |
+| `core` | The domain types, the ports and the application services, in Java that uses no framework. `app`'s `ApplicationServiceConfiguration` builds the services as beans. |
 | `app` | The Spring Boot entry point and its configuration, the adapters (the controllers, the demo sign-in and the Spring Data JPA repositories), and the Liquibase SQL changelogs. `ArchitectureTest` checks what each layer may use, in both modules. |
 
 [ADR 0007](../docs/adr/0007-backend-modules.md) says why there are two, and [hexagonal.md](../docs/conventions/hexagonal.md) where code goes in each.

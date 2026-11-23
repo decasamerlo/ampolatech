@@ -6,16 +6,13 @@ import dev.ampolatech.domain.User;
 import dev.ampolatech.port.in.GetSignedInUserQuery;
 import dev.ampolatech.port.out.PharmacyRepositoryPort;
 import dev.ampolatech.port.out.UserRepositoryPort;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class UserApplicationService implements GetSignedInUserQuery {
 
   private final UserRepositoryPort users;
   private final PharmacyRepositoryPort pharmacies;
-
-  public UserApplicationService(UserRepositoryPort users, PharmacyRepositoryPort pharmacies) {
-    this.users = users;
-    this.pharmacies = pharmacies;
-  }
 
   @Override
   public GetSignedInUserQuery.Result getSignedInUser(Actor actor) {
