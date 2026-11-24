@@ -5,32 +5,25 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "app_user")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class UserEntity {
 
   @Id
   @Column(name = "id", nullable = false)
+  @Getter(AccessLevel.PACKAGE)
   private UUID id;
 
   @Column(name = "pharmacy_id", nullable = false)
+  @Getter(AccessLevel.PACKAGE)
   private UUID pharmacyId;
 
   @Column(name = "name", nullable = false)
+  @Getter(AccessLevel.PACKAGE)
   private String name;
-
-  protected UserEntity() {}
-
-  UUID getId() {
-    return id;
-  }
-
-  UUID getPharmacyId() {
-    return pharmacyId;
-  }
-
-  String getName() {
-    return name;
-  }
 }

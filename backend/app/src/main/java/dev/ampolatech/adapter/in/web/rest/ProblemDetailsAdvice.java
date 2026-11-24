@@ -2,9 +2,8 @@ package dev.ampolatech.adapter.in.web.rest;
 
 import dev.ampolatech.adapter.in.web.rest.model.ProblemDto;
 import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,9 +21,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * these bodies to the spec (ADR 0006).
  */
 @RestControllerAdvice
+@Slf4j
 class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
-
-  private static final Logger log = LoggerFactory.getLogger(ProblemDetailsAdvice.class);
 
   /**
    * Answers an exception nothing else handles with a 500 that carries no detail: the exception's

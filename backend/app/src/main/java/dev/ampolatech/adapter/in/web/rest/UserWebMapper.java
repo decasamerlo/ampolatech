@@ -8,16 +8,15 @@ import dev.ampolatech.port.in.GetSignedInUserQuery;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserWebMapper {
 
   private final PharmacyWebMapper pharmacyMapper;
-
-  UserWebMapper(PharmacyWebMapper pharmacyMapper) {
-    this.pharmacyMapper = pharmacyMapper;
-  }
 
   SignedInUserDto toDto(GetSignedInUserQuery.Result signedIn) {
     User user = signedIn.user();

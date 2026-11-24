@@ -71,7 +71,8 @@ class ArchitectureTest {
               "java.math..",
               "dev.ampolatech.domain..",
               "dev.ampolatech.port..",
-              "dev.ampolatech.application..");
+              "dev.ampolatech.application..",
+              "lombok");
 
   // A port's Command and Result records nest inside it, so the rule holds only the top-level types.
   @ArchTest
@@ -103,6 +104,7 @@ class ArchitectureTest {
               "com.fasterxml.jackson.annotation",
               "jakarta.validation",
               "jakarta.validation.constraints",
+              "lombok",
               "org.jspecify.annotations",
               "org.slf4j",
               "org.springframework.http",
@@ -153,6 +155,7 @@ class ArchitectureTest {
               "dev.ampolatech.port.out..",
               "dev.ampolatech.adapter.out.persistence..",
               "jakarta.persistence",
+              "lombok",
               "org.springframework.data.jpa.repository",
               "org.springframework.stereotype");
 }

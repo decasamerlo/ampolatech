@@ -7,6 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * One role a user holds. It has no association with {@link UserEntity}: {@link
@@ -18,6 +21,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "app_user_role")
 @IdClass(UserRoleId.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class UserRoleEntity {
 
   @Column(name = "pharmacy_id", nullable = false)
@@ -29,13 +33,8 @@ class UserRoleEntity {
 
   @Id
   @Column(name = "role", nullable = false)
+  @Getter(AccessLevel.PACKAGE)
   private String role;
-
-  protected UserRoleEntity() {}
-
-  String getRole() {
-    return role;
-  }
 
   /**
    * The primary key, app_user_role_pkey. Its components take the names of the {@code @Id} fields

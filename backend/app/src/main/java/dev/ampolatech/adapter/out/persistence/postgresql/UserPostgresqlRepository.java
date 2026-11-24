@@ -5,23 +5,17 @@ import dev.ampolatech.domain.User;
 import dev.ampolatech.domain.UserId;
 import dev.ampolatech.port.out.UserRepositoryPort;
 import java.util.Optional;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserPostgresqlRepository implements UserRepositoryPort {
 
   private final SpringDataUserRepository users;
   private final SpringDataUserRoleRepository userRoles;
   private final UserPersistenceMapper mapper;
-
-  UserPostgresqlRepository(
-      SpringDataUserRepository users,
-      SpringDataUserRoleRepository userRoles,
-      UserPersistenceMapper mapper) {
-    this.users = users;
-    this.userRoles = userRoles;
-    this.mapper = mapper;
-  }
 
   @Override
   public Optional<User> findById(UserId id, PharmacyId pharmacyId) {
