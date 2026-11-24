@@ -7,9 +7,12 @@ import dev.ampolatech.port.out.UserRepositoryPort;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-@Repository
+// A @Component, not a @Repository, so a port's caller receives the exception thrown here: the
+// exception translation @Repository turns on would rewrap an IllegalStateException or an
+// IllegalArgumentException as Spring's InvalidDataAccessApiUsageException.
+@Component
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserPostgresqlRepository implements UserRepositoryPort {
 

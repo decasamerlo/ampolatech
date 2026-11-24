@@ -11,5 +11,6 @@ Staff sign in with their Google accounts through OpenID Connect, and AmpolaTech 
 
 - The backend runs the sign-in and holds the session. The browser gets only an HttpOnly, SameSite session cookie, and no token ever reaches it.
 - Who is signed in comes through a port from the first slice. Until the sign-in slice ships, a local-only adapter signs everyone in as a configured user and pharmacy; it runs only under the local profile, and Google sign-in replaces it before any real data goes in.
+- What Google sign-in replaces of that local-only adapter, the demo sign-in, is for the sign-in slice's spec to decide, between two shapes: one `CurrentActor` that reads the actor the request carries, with only what puts the actor there swapped, so the demo sign-in runs the same path as production; or one `CurrentActor` per sign-in, as the demo sign-in provides its own. #35's closing comment records what that spec starts from.
 - The identity provider sits behind a port. A pharmacy whose staff don't use Google gets a new adapter (the app's own accounts or another OpenID Connect provider), not a rewrite.
 - With personal Google accounts, the pharmacy can't require two-step verification, and removing someone means deactivating their AmpolaTech user.

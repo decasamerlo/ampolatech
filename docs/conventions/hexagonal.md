@@ -1,6 +1,6 @@
 # Hexagonal architecture
 
-Where the backend's code lives, how its ports are named, and who implements them. The backend is hexagonal ([ADR 0002](../adr/0002-stack.md)): the domain, the ports and the application services depend on no framework, and adapters reach them only through ports. The compiler and `ArchitectureTest` enforce where code lives and what it may use ([ADR 0007](../adr/0007-backend-modules.md)), and `ArchitectureTest` that a port is an interface; review enforces the rest, the names among them.
+Where the backend's code lives, how its aggregates and ports are written, who implements the ports, and how `app` builds what it runs. The backend is hexagonal ([ADR 0002](../adr/0002-stack.md)): the domain, the ports and the application services depend on no framework, and adapters reach them only through ports. The compiler and `ArchitectureTest` enforce where code lives and what it may use ([ADR 0007](../adr/0007-backend-modules.md)), and `ArchitectureTest` that a port is an interface; review enforces the rest, the names among them.
 
 ## Modules and packages
 
@@ -11,7 +11,7 @@ Where the backend's code lives, how its ports are named, and who implements them
 
 - **An adapter's package is `adapter.{in,out}.{category}.{implementation}`**: its direction, what it does, and which one it is, such as `adapter.in.web.rest`, `adapter.in.signin.demo` and `adapter.out.persistence.postgresql`. The implementation is written even when it is the only one, so a second never moves the first.
 - **The Liquibase changelogs live in `app`'s resources, under `db/postgresql/changelog/`.** The path names the database, not an adapter, because every adapter that uses PostgreSQL shares its schema.
-- **An adapter reaches the application through a port alone.** Only the composition root, which builds the application services, reaches a service or an adapter.
+- **An adapter reaches the application through a port alone.** Only the composition root reaches a service or an adapter.
 - **An adapter turns an aggregate into its own model, or back, in that aggregate's mapper beside it, `{Aggregate}{Category}Mapper`**: `UserPersistenceMapper` turns a `UserEntity` into a `User`, and `PharmacyWebMapper` a `Pharmacy` into a `PharmacyDto`. The mapper is a `@Component` the adapter takes in its constructor, and one whose model holds another aggregate's takes that aggregate's mapper, as `UserWebMapper` takes `PharmacyWebMapper`. Each adapter's conversions then sit in the same kind of place, and a second class that needs one calls it rather than copying it.
 
 ### Writing `ArchitectureTest`'s rules
@@ -34,6 +34,19 @@ Where the backend's code lives, how its ports are named, and who implements them
   - the web adapters' allow-list: a web adapter holding a `java.sql.Connection`;
   - the sign-in adapters' allow-list: a sign-in adapter holding Boot's `DataSourceBuilder`;
   - the persistence adapters' allow-list: a persistence adapter holding an `HttpServletRequest`.
+
+## The domain
+
+How a type in `core`'s `domain` package is written.
+
+- **An aggregate is a record**, as `User` and `Pharmacy` are.
+- **Its compact constructor holds only what is true of every instance, stored ones included**: a component is present, a name isn't blank.
+- **A rule that holds only when an aggregate is registered goes in a static `create(…)` on the record.** Registering is the operation that first creates an aggregate, as #109 registers a prescription, and #8's limit on a prescription file's size is such a rule. The application service calls `create(…)`, and the persistence mapper rebuilds a stored aggregate through the canonical constructor, so a registration rule tightened later leaves stored rows loadable.
+- **Only review keeps a caller on `create(…)`**, since a record's canonical constructor can't be private: javac refuses it, "attempting to assign stronger access privileges; was public".
+- **A value object is a record that checks in its compact constructor the rules true of every instance.** A rule that holds only when its aggregate is registered, such as #8's limit on a prescription file's size, goes in the aggregate's `create(…)` all the same.
+- **An aggregate's id is `{Aggregate}Id`**, a record over a `UUID` with a static `of(UUID)`, as `UserId` and `PharmacyId` are.
+
+**The first aggregate that changes after it is registered becomes a class**, most likely a user or a pharmacy being renamed: a private constructor, `create(…)` for a new one and `reconstitute(…)` for a stored one. Entities and domain services wait for that aggregate, or for the first aggregate that holds an entity.
 
 ## Ports
 
@@ -69,13 +82,35 @@ A method's prefix says what absence means, in driving and driven ports alike:
 
 **The application service of the operation's aggregate**, named `{Aggregate}ApplicationService`, in `core`'s `application` package: `UserApplicationService` implements `GetSignedInUserQuery`. One service holds every operation of its aggregate, and each caller sees only the port it uses. Like the rest of `core`, it depends on no framework, so it carries no framework's annotation and the composition root builds it.
 
-**An operation writes through one driven port.** Its write then needs no transaction beyond the one its adapter runs, and no application service opens one. An operation that would write through two needs a decision first on where its transaction begins, since an application service can't carry Spring's `@Transactional` ([ADR 0007](../adr/0007-backend-modules.md)); #105 weighs the options.
+**An application service only coordinates**: it reads through a port, calls the domain, and writes through another port. Where the permission check runs is #116's to decide.
+
+**An operation writes through one driven port.** Its write then needs no transaction beyond the one its adapter runs, and no application service opens one. An operation that would write through two needs a decision first on where its transaction begins, since an application service can't carry Spring's `@Transactional` ([ADR 0007](../adr/0007-backend-modules.md)); #105's closing comment records the options weighed.
+
+**A service that needs the time takes a `java.time.Clock` in its constructor**, reads `clock.instant()` once per operation and passes that instant to the domain, so every instant one operation records is the same. The composition root provides one `Clock` bean, `Clock.systemUTC()`, from the change that brings the first service that takes it.
+
+**A service that creates an aggregate takes a `Supplier<{Aggregate}Id>` in its constructor**, so how an id is made is chosen in the composition root, not in each service. It calls `get()` once per new aggregate and passes the id to `create(…)`. The composition root passes the supplier as a lambda in that service's `@Bean` method, such as `() -> PrescriptionId.of(UUID.randomUUID())`, not as a bean of its own, so no test sets the id a service gives a new aggregate: a test that needs it reads it from the response.
+
+**A test at the HTTP API that checks an instant puts a fixed `Clock` in place of the composition root's bean**, since that is the seam a service is tested at.
+
+## The composition root
+
+How `app` builds what it runs, from `AmpolaTechApplication` and the other classes in the package `dev.ampolatech`.
+
+- **Component scanning finds the adapters and the mappers**, by the stereotype each carries, such as `@RestController` or `@Component`, so every adapter class stays package-private: a `@Bean` method in `dev.ampolatech` couldn't call its constructor.
+- **`ApplicationServiceConfiguration` builds the application services**, with `new` in `@Bean` methods, since a service carries no framework's annotation for scanning to find.
+- **An adapter that configuration turns on gets a `@Configuration` in its own package**, as `DemoSignInConfiguration` in `adapter.in.signin.demo` builds the demo sign-in's `CurrentActor` only when `ampolatech.sign-in.demo.enabled` is true.
+- **A persistence adapter is a `@Component`, not a `@Repository`**, so a port's caller receives the exception the adapter threw. The exception translation `@Repository` turns on would rewrap an `IllegalStateException` or an `IllegalArgumentException` thrown in the adapter, by its mapper or a domain type's constructor, as Spring's `InvalidDataAccessApiUsageException`, a type `core` can't name. The Spring Data repository behind the adapter keeps its own translation.
 
 ## Sources
 
 - Alistair Cockburn, [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/): the application talks to the outside only through ports, which adapters call or implement.
 - Tom Hombergs, *Get Your Hands Dirty on Clean Architecture*, and its example code, [buckpal](https://github.com/thombergs/buckpal): one interface per operation in `port.in`, taking a command for a write and a query for a read. buckpal has a service per operation; this repository keeps one per aggregate.
-- nesto's [ADR 014](https://github.com/decasamerlo/nesto/blob/main/docs/adr/014-backend-module-layout.md): the same two modules, and the adapter package format.
+- Vaughn Vernon, *Implementing Domain-Driven Design*, chapter 10, "Aggregates", and chapter 14, "Application".
+- nesto's [ADR 007](https://github.com/decasamerlo/nesto/blob/main/docs/adr/007-immutable-node-entity.md): an aggregate that changes, written as a class with a private constructor, `create()` for a new one and `reconstitute()` for a stored one.
+- nesto's [ADR 008](https://github.com/decasamerlo/nesto/blob/main/docs/adr/008-application-layer.md): "An application service reads through a port, calls the domain, and writes through a port"; it takes a `Clock` in its constructor and reads `clock.instant()` once per operation; "Adapters stay annotated and component-scanned."
+- nesto's [ADR 014](https://github.com/decasamerlo/nesto/blob/main/docs/adr/014-backend-module-layout.md): the same two modules, the adapter package format, and a composition root whose `ApplicationServiceConfiguration` builds the application services, while "Configuration that belongs to one adapter stays in that adapter's package."
+- nesto's backend, [`NodePostgresqlRepository`](https://github.com/decasamerlo/nesto-backend/blob/af8b5b95f542dcc72453f3eec61a2f373240c25f/app/src/main/java/dev/nesto/adapter/out/persistence/postgresql/NodePostgresqlRepository.java): a persistence adapter that is a `@Component` and not a `@Repository`, for the same reason.
+- Spring Boot's reference, [Spring Beans and Dependency Injection](https://docs.spring.io/spring-boot/4.1/reference/using/spring-beans-and-dependency-injection.html): "We generally recommend using constructor injection to wire up dependencies and @ComponentScan to find beans."
 - [nesto#19](https://github.com/decasamerlo/nesto/issues/19), which proposes the same pairing for nesto: an application service per aggregate, with an interface per operation.
 - Martin Fowler, [CommandQuerySeparation](https://martinfowler.com/bliki/CommandQuerySeparation.html): why a read and a write are named apart.
 - Joshua Bloch, *Effective Java*, 3rd edition, item 54, "Return empty collections or arrays, not nulls": why a `list…` answers absence with an empty `List`.
