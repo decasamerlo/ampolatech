@@ -45,6 +45,7 @@ How a type in `core`'s `domain` package is written.
 - **Only review keeps a caller on `create(…)`**, since a record's canonical constructor can't be private: javac refuses it, "attempting to assign stronger access privileges; was public".
 - **A value object is a record that checks in its compact constructor the rules true of every instance.** A rule that holds only when its aggregate is registered, such as #8's limit on a prescription file's size, goes in the aggregate's `create(…)` all the same.
 - **An aggregate's id is `{Aggregate}Id`**, a record over a `UUID` with a static `of(UUID)`, as `UserId` and `PharmacyId` are.
+- **An aggregate refers to another by the other's `{Aggregate}Id`**, as `User` holds a `PharmacyId`, and the persistence adapter's JPA entity maps the reference as a plain `@Column` over the `UUID`, as `UserEntity` maps `pharmacy_id`.
 
 **The first aggregate that changes after it is registered becomes a class**, most likely a user or a pharmacy being renamed: a private constructor, `create(…)` for a new one and `reconstitute(…)` for a stored one. Entities and domain services wait for that aggregate, or for the first aggregate that holds an entity.
 
@@ -84,6 +85,10 @@ A method's prefix says what absence means, in driving and driven ports alike:
 
 **An application service only coordinates**: it reads through a port, calls the domain, and writes through another port. Where the permission check runs is #116's to decide.
 
+**A read that needs more than one aggregate reads each through that aggregate's own repository port, and the application service combines them.** It reads each aggregate once for the whole answer, never once per item: `getSignedInUser` reads the actor's user through `UserRepositoryPort` and its pharmacy through `PharmacyRepositoryPort`, and #6's list of orders reads the orders, then, in one call, the users who registered them. Each `{Aggregate}RepositoryPort` then still persists one aggregate, at a cost of a statement or more per aggregate where a join runs one, and Vernon takes the same default until query overhead becomes a problem (*Sources*).
+
+**A join waits for its trigger**: the first read that must sort, filter or page on another aggregate's column, or whose measured cost is a problem. #106's closing comment records what was found for a join.
+
 **An operation writes through one driven port.** Its write then needs no transaction beyond the one its adapter runs, and no application service opens one. An operation that would write through two needs a decision first on where its transaction begins, since an application service can't carry Spring's `@Transactional` ([ADR 0007](../adr/0007-backend-modules.md)); #105's closing comment records the options weighed.
 
 **A service that needs the time takes a `java.time.Clock` in its constructor**, reads `clock.instant()` once per operation and passes that instant to the domain, so every instant one operation records is the same. The composition root provides one `Clock` bean, `Clock.systemUTC()`, from the change that brings the first service that takes it.
@@ -105,7 +110,7 @@ How `app` builds what it runs, from `AmpolaTechApplication` and the other classe
 
 - Alistair Cockburn, [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/): the application talks to the outside only through ports, which adapters call or implement.
 - Tom Hombergs, *Get Your Hands Dirty on Clean Architecture*, and its example code, [buckpal](https://github.com/thombergs/buckpal): one interface per operation in `port.in`, taking a command for a write and a query for a read. buckpal has a service per operation; this repository keeps one per aggregate.
-- Vaughn Vernon, *Implementing Domain-Driven Design*, chapter 10, "Aggregates", and chapter 14, "Application".
+- Vaughn Vernon, *Implementing Domain-Driven Design*, chapter 10, "Aggregates", and chapter 14, "Application". Chapter 10 has an aggregate refer to another by identity (p. 361) and fills a view from several repositories: "You may have to use multiple Repositories in a single use case to populate views. If query overhead causes performance issues, it may be worth considering the use of theta joins or CQRS." (p. 363)
 - nesto's [ADR 007](https://github.com/decasamerlo/nesto/blob/main/docs/adr/007-immutable-node-entity.md): an aggregate that changes, written as a class with a private constructor, `create()` for a new one and `reconstitute()` for a stored one.
 - nesto's [ADR 008](https://github.com/decasamerlo/nesto/blob/main/docs/adr/008-application-layer.md): "An application service reads through a port, calls the domain, and writes through a port"; it takes a `Clock` in its constructor and reads `clock.instant()` once per operation; "Adapters stay annotated and component-scanned."
 - nesto's [ADR 014](https://github.com/decasamerlo/nesto/blob/main/docs/adr/014-backend-module-layout.md): the same two modules, the adapter package format, and a composition root whose `ApplicationServiceConfiguration` builds the application services, while "Configuration that belongs to one adapter stays in that adapter's package."
