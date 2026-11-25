@@ -1,0 +1,4 @@
+/* Class names come from src/ alone, the folder above this one, which holds
+   every layer. Without a source, Tailwind reads the files under web/ for
+   them, its docs and configs included. */
+@import "tailwindcss" source("..");
