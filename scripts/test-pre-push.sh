@@ -146,6 +146,11 @@ commit_probe
 branch web-unchecked
 printf 'import { useGetSignedInUser } from "@/shared/api/generated/users/users";\n\nexport function OrdersPage() {\n\tconst query = useGetSignedInUser();\n\treturn <h1>{query.data?.email}</h1>;\n}\n' >web/src/pages/orders/ui/orders-page.tsx
 commit_probe
+# The route file reaches past the page's index.ts, which the type-check
+# and Biome both pass.
+branch web-past-index
+printf 'import { createFileRoute } from "@tanstack/react-router";\nimport { OrdersPage } from "@/pages/orders/ui/orders-page";\n\nexport const Route = createFileRoute("/orders")({ component: OrdersPage });\n' >web/src/app/routes/orders.tsx
+commit_probe
 branch web-unformatted
 printf 'export const probe  =  1;\n' >web/src/probe.ts
 commit_probe
@@ -273,6 +278,7 @@ expect "a web/ lockfile out of step with package.json is refused" 1 '*ERR_PNPM_O
 expect "a client Orval can't generate is refused" 1 '*missing.yaml*fails pnpm generate*' "$(push web-ungenerated)"
 expect "a change to web/ that leaves no web/ is refused as not checked" 1 '*has no web/ to check*' "$(push web-missing)"
 expect "a page reading a property the spec's SignedInUser lacks is refused, the type-check named" 1 "*Property 'email' does not exist on type 'SignedInUser'*fails the web app's type-check*" "$(push web-unchecked)"
+expect "a route file importing a page past its index.ts is refused, its rule and import named" 1 "*pages-through-their-index: src/app/routes/orders.tsx*breaks the web app's import rules*" "$(push web-past-index)"
 expect "web/ code Biome would reformat is refused" 1 "*fails Biome's check*" "$(push web-unformatted)"
 expect "web/ code Biome would reformat, in a file named outside ASCII, is refused" 1 "*ação.ts*fails Biome's check*" "$(push web-unformatted-non-ascii)"
 expect "web/ code Biome leaves alone passes" 0 '*' "$(push web-clean)"

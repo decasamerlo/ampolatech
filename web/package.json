@@ -8,6 +8,7 @@
 		"typecheck": "tsc --noEmit && tsc --noEmit --project tsconfig.node.json",
 		"build": "pnpm generate && pnpm typecheck && vite build",
 		"check": "biome ci --error-on-warnings .",
+		"check:imports": "depcruise src --config .dependency-cruiser.cjs",
 		"fix": "biome check --write .",
 		"test:e2e": "playwright test"
 	},
@@ -20,6 +21,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.6.4",
 		"@playwright/test": "1.64.1",
+		"@swc/core": "1.16.22",
 		"@tailwindcss/vite": "4.3.3",
 		"@tanstack/router-cli": "1.167.46",
 		"@tanstack/router-plugin": "1.168.48",
@@ -27,6 +29,7 @@
 		"@types/react": "19.3.0",
 		"@types/react-dom": "19.3.0",
 		"@vitejs/plugin-react": "6.1.2",
+		"dependency-cruiser": "18.8.0",
 		"orval": "8.45.0",
 		"tailwindcss": "4.3.3",
 		"typescript": "7.0.2",

@@ -102,6 +102,7 @@ jobs:
       - run: pnpm generate
       - run: pnpm typecheck
       - run: pnpm check
+      - run: pnpm check:imports
       # Both projects in playwright.config.ts launch Chromium headless, which
       # runs the headless shell alone, and a runner has neither it nor the
       # system libraries it needs.
