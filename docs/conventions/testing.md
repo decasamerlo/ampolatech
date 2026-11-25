@@ -21,7 +21,7 @@ A seam is where a test meets the code: what it calls, and what it treats as the 
 
 ## Application services and driving adapters
 
-An application service is tested through the HTTP API, against the real adapters. It only coordinates: it reads through a port, calls the domain, and writes through another port. A unit test would replace its ports with mocks and could then check only which calls the service made, so it would break whenever the service changed how it calls them, with behaviour intact.
+An application service is tested through the HTTP API, against the real adapters. It only coordinates ([hexagonal.md](hexagonal.md)), so a unit test would replace its ports with mocks and could then check only which calls the service made: it would break whenever the service changed how it calls them, with behaviour intact. How such a test fixes the time is in hexagonal.md's *Who implements a driving port*.
 
 A driving adapter is tested there too, with the framework running: sign-in and the HTTP binding are what it adds.
 
