@@ -2,10 +2,13 @@
 # local-address settings from .npmrc.
 
 # Orval's @orval/core pulls in esbuild, whose build script Orval doesn't
-# need. pnpm fails an install that leaves a dependency's build script
+# need. @swc/core's checks that its native binary loads and installs a
+# WebAssembly one when it doesn't, and dependency-cruiser parses with the
+# native one. pnpm fails an install that leaves a dependency's build script
 # neither allowed nor denied.
 allowBuilds:
   esbuild: false
+  "@swc/core": false
 
 # 7 days, the age #2 sets for a dependency update. Written out, since
 # pnpm's default differs between majors; set here, a version younger than

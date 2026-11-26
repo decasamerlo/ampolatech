@@ -199,6 +199,10 @@ for ref in $pushed; do
       refuse_after_pnpm "$branch" "fails the web app's type-check above; fix the code it names on that branch and amend"
     pnpm_on "$sha" check ||
       refuse_after_pnpm "$branch" "fails Biome's check above; run pnpm fix in web/ on that branch and amend, then fix what it leaves"
+    # Reads the client and the route tree pnpm generate wrote, as an
+    # import of either must resolve.
+    pnpm_on "$sha" check:imports ||
+      refuse_after_pnpm "$branch" "breaks the web app's import rules above, each named before the import that breaks it; move that import or its code on that branch and amend. When pnpm finds no check:imports above, the branch's commit predates the script: rebase it onto main, or push a stack's layer below the script from a checkout of that layer"
   fi
   if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"
