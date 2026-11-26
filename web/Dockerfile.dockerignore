@@ -6,8 +6,8 @@
 !web/
 web/node_modules
 web/dist
-web/src/api/generated
-web/src/routeTree.gen.ts
+web/src/shared/api/generated
+web/src/app/routeTree.gen.ts
 web/.tanstack
 web/test-results
 web/playwright-report

@@ -1,5 +1,5 @@
-import type { Role } from "../api/generated/model";
-import { useGetSignedInUser } from "../api/generated/users/users";
+import type { Role } from "@/shared/api/generated/model";
+import { useGetSignedInUser } from "@/shared/api/generated/users/users";
 
 // A role the spec adds fails the type-check until it has a label here.
 const roleLabels = {

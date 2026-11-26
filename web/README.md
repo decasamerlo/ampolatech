@@ -71,7 +71,7 @@ Each Docker call the run makes has a time limit: 10 minutes on `docker compose u
 
 `pnpm generate` writes two things, and neither is committed (ADR 0006):
 
-- **The API's client**, in `src/api/generated/`: TanStack Query hooks that Orval generates from `api/openapi.yaml`, configured in `orval.config.ts`. Every request goes through the mutator, `src/api/call-api.ts`, whose errors are the hooks' error type.
-- **The route tree**, in `src/routeTree.gen.ts`: TanStack Router's CLI generates it from the files in `src/routes/`, configured in `tsr.config.json`, which the router's Vite plugin reads too. TanStack's FAQ says to commit it; it stays out for ADR 0006's reason, since Renovate's hosted app won't regenerate a committed file.
+- **The API's client**, in `src/shared/api/generated/`: TanStack Query hooks that Orval generates from `api/openapi.yaml`, configured in `orval.config.ts`. Every request goes through the mutator, `src/shared/api/call-api.ts`, whose errors are the hooks' error type.
+- **The route tree**, in `src/app/routeTree.gen.ts`: TanStack Router's CLI generates it from the files in `src/app/routes/`, configured in `tsr.config.json`, which the router's Vite plugin reads too. TanStack's FAQ says to commit it; it stays out for ADR 0006's reason, since Renovate's hosted app won't regenerate a committed file.
 
 The repository's one `.gitignore`, at its root, lists both. Biome reads it there (`vcs.root` in `biome.json`) and leaves them alone.

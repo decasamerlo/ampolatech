@@ -144,7 +144,7 @@ branch web-missing
 git rm -q -r web
 commit_probe
 branch web-unchecked
-printf 'import { useGetSignedInUser } from "../api/generated/users/users";\n\nexport function OrdersPage() {\n\tconst query = useGetSignedInUser();\n\treturn <h1>{query.data?.email}</h1>;\n}\n' >web/src/orders/orders-page.tsx
+printf 'import { useGetSignedInUser } from "@/shared/api/generated/users/users";\n\nexport function OrdersPage() {\n\tconst query = useGetSignedInUser();\n\treturn <h1>{query.data?.email}</h1>;\n}\n' >web/src/pages/orders/ui/orders-page.tsx
 commit_probe
 branch web-unformatted
 printf 'export const probe  =  1;\n' >web/src/probe.ts
