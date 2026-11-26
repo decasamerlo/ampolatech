@@ -22,6 +22,8 @@ When sources disagree, the higher one wins:
 5. **The market standard**: what mature projects in the ecosystem do.
 6. **A scaffold, a template, a blog post or an answer.** Never a reason on its own.
 
+When the choice is whether to change an ADR or a convention, that document is what is being decided, not a source above the options: the other ADRs and conventions, and the sources below them, weigh the options.
+
 A departure from 2 to 5 needs a reason that is one of the values. The reason goes in the commit body, and in a comment too when the code would otherwise look wrong ([comments.md](comments.md)).
 
 Two checks come before a reason is used:
