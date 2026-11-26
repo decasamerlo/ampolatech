@@ -18,6 +18,8 @@ Left out, a name is derived. A table's comes from the entity class, so `Pharmacy
 
 The naming strategy rewrites a written name too: `@Column(name = "pharmacyId")` still maps to `pharmacy_id`, and `@Table(name = "AppUser")` to `app_user`. The app starts with either, but a search for `pharmacy_id` or `app_user` misses both, hence the changeset's spelling.
 
+Review holds this rule. `ddl-auto: validate`, in `backend/app/src/main/resources/application.yml`, refuses to start the app when a name, written or derived, misses the schema, so the tests that start the app fail, in CI too. It lets through a name that maps a column the table has, such as `@Column(name = "pharmacyId")` or a `pharmacy_id` derived from the field: those are the names review looks for.
+
 ## A reserved noun gets the `app_` prefix
 
 PostgreSQL reserves `user` and `order` ([Appendix C](https://www.postgresql.org/docs/current/sql-keywords-appendix.html)), and a reserved name works only double-quoted, everywhere it appears. When a table's natural noun is reserved, and only then, the table takes the `app_` prefix: `app_user` and `app_order`, but `pharmacy`.
