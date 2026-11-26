@@ -71,7 +71,7 @@ A lone PR is a branch off `main`: `git switch -c <branch> main`, commit, `git pu
 
 ## Merging
 
-The author merges a stack in GitHub's interface, squash, bottom-up. After each layer merges, GitHub rebases the next layer onto `main` and force-pushes it, and the local branches catch up in the main checkout:
+The author merges a stack in GitHub's interface, squash, bottom-up. After each layer merges, GitHub rebases the next layer onto `main` and force-pushes it. When a merged PR closes a `Decide …` issue, the agent first posts the issue's closing comment, as *Landing a `Decide …` issue* in [issue-tracker.md](../agents/issue-tracker.md) says. Then the local branches catch up in the main checkout:
 
 ```bash
 gh stack sync                  # from a stack branch: main fast-forwarded, the rest rebased and pushed
