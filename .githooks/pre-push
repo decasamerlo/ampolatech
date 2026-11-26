@@ -22,6 +22,11 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 trap 'exit 1' HUP INT TERM
 
+# The way out for a stack's lower layer that lacks a script a layer above
+# it adds: this file is the working tree's, so the layer goes up from its
+# own checkout, whose hook lacks the check that runs the script.
+layer_way_out="push a stack's layer below the script from a checkout of that layer"
+
 # A check runs the script of the commit it checks, taken from Git, since
 # the working tree's copy can belong to another branch or hold an edit
 # that isn't committed. The script is taken alone, into a folder apart
@@ -29,7 +34,7 @@ trap 'exit 1' HUP INT TERM
 # commit having passed.
 take_script() { # branch commit script
   if ! git cat-file -e "$2:scripts/$3" 2>/dev/null; then
-    echo "pre-push: $1's commit $(git rev-parse --short "$2^{commit}") has no scripts/$3 for the hook to run on it; rebase the branch onto main when it predates the script" >&2
+    echo "pre-push: $1's commit $(git rev-parse --short "$2^{commit}") has no scripts/$3 for the hook to run on it; rebase the branch onto main when it predates the script, or $layer_way_out" >&2
     exit 1
   fi
   mkdir -p "$work/taken/$2"
@@ -202,7 +207,7 @@ for ref in $pushed; do
     # Reads the client and the route tree pnpm generate wrote, as an
     # import of either must resolve.
     pnpm_on "$sha" check:imports ||
-      refuse_after_pnpm "$branch" "breaks the web app's import rules above, each named before the import that breaks it; move that import or its code on that branch and amend. When pnpm finds no check:imports above, the branch's commit predates the script: rebase it onto main, or push a stack's layer below the script from a checkout of that layer"
+      refuse_after_pnpm "$branch" "breaks the web app's import rules above, each named before the import that breaks it; move that import or its code on that branch and amend. When pnpm finds no check:imports above, the branch's commit predates the script: rebase it onto main, or $layer_way_out"
   fi
   if printf '%s\n' "$changed" | grep -Eq '^(\.githooks|scripts)/'; then
     export_commit "$sha"
