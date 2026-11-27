@@ -72,13 +72,37 @@ A lone PR is a branch off `main`: `git switch -c <branch> main`, commit, `git pu
 
 ## Merging
 
-The author merges a stack in GitHub's interface, squash, bottom-up. After each layer merges, GitHub rebases the next layer onto `main` and force-pushes it. When a merged PR closes a `Decide …` issue, the agent first posts the issue's closing comment, as *Landing a `Decide …` issue* in [issue-tracker.md](../agents/issue-tracker.md) says. Then the local branches catch up in the main checkout:
+The author merges in GitHub's interface, squash: a lone PR, or a stack bottom-up. After each layer merges, GitHub rebases the next layer onto `main` and force-pushes it. When a merged PR closes a `Decide …` issue, the agent first posts the issue's closing comment, as *Landing a `Decide …` issue* in [issue-tracker.md](../agents/issue-tracker.md) says. Then the local branches catch up in the main checkout, once for all the PRs merged since the last catch-up. First `main` comes up to date. When only lone PRs merged:
+
+```bash
+git switch main
+git pull --ff-only
+```
+
+When a stack's layer merged, with lone PRs or without, `gh stack sync` alone does it:
 
 ```bash
 gh stack sync                  # from a stack branch: main fast-forwarded, the rest rebased and pushed
-git branch -D <merged-branch>  # sync keeps it
-gh stack unstack <n> --local   # after the top layer: drops "Stack #<n>" from .git/gh-stack
 ```
+
+In a terminal, `gh stack sync` offers to prune the merged layers, default yes: answer no, since it deletes them unchecked.
+
+Then each merged PR's branch, a lone PR's or a stack's layer, is checked and deleted from a branch other than the one deleted, since `git branch -D` refuses the branch checked out. A PR whose branch the checkout doesn't hold has nothing to delete.
+
+```bash
+gh pr view <pr> --json state,headRefName,headRefOid
+git rev-parse <headRefName>
+git branch -D <headRefName>    # only when state is MERGED and the tip is headRefOid
+gh stack unstack <n> --local   # after a stack's top layer: drops "Stack #<n>" from .git/gh-stack
+```
+
+The check compares the branch with the head its PR merged from: `main` holds only a squash commit, and a comparison with it, or a test merge of the branch into `main`, can call a merged branch unmerged once another merge has changed `main`. #167's closing comment records the options weighed and what the probes found.
+
+**A refusal stops the catch-up.** The agent leaves `main` or the branch as it is and reports to the author:
+
+- **A `main` that `git pull --ff-only` can't fast-forward**, as when `main` holds a commit `origin/main` lacks: the pull stops at `fatal: Not possible to fast-forward, aborting.`, and the report gives `git log --oneline origin/main..main`.
+- **A branch whose PR isn't `MERGED`, or whose tip isn't `headRefOid`:** the report gives the PR's state and head, the branch's tip, and the commits the branch holds beyond that head, from `git fetch origin pull/<pr>/head`, then `git log --oneline FETCH_HEAD..<headRefName>`. The fetch comes first because the checkout may not hold the head; GitHub keeps `refs/pull/<pr>/head` after the merge and the branch's deletion.
+- **A stack's layer that merged from the head GitHub's rebase made** is refused that way. GitHub rebases and force-pushes a layer once the layer below it merges; when the layer then merges before a catch-up, its PR merged from a head its local branch never held. The report's log lists the layer's commit from before that rebase and those of the layers below it.
 
 Each merged stack left in the tracking keeps `main` as its trunk, and once two do, `gh stack view` on `main` stops at `branch "main" belongs to multiple stacks`.
 
