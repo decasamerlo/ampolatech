@@ -22,23 +22,19 @@ public class UserApplicationService implements GetSignedInUserQuery {
   private User userOf(Actor actor) {
     return users
         .findById(actor.userId(), actor.pharmacyId())
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "The signed-in user "
-                        + actor.userId().value()
-                        + " does not exist in pharmacy "
-                        + actor.pharmacyId().value()));
+        .orElseThrow(() ->
+            new IllegalStateException(
+                "The signed-in user "
+                    + actor.userId().value()
+                    + " does not exist in pharmacy "
+                    + actor.pharmacyId().value()));
   }
 
   private Pharmacy pharmacyOf(Actor actor) {
     return pharmacies
         .findById(actor.pharmacyId())
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "The signed-in user's pharmacy "
-                        + actor.pharmacyId().value()
-                        + " does not exist"));
+        .orElseThrow(() ->
+            new IllegalStateException(
+                "The signed-in user's pharmacy " + actor.pharmacyId().value() + " does not exist"));
   }
 }
