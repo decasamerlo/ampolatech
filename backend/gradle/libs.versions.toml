@@ -7,8 +7,7 @@ lombok = "1.18.48"
 openapi-generator = "7.27.0"
 openapi-request-validator = "3.0.0"
 spotless = "8.10.4"
-# 1.37.0 fails to load in Spotless 8.10.4 (diffplug/spotless#3126).
-google-java-format = "1.36.1"
+google-java-format = "2.0.0"
 
 [libraries]
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }

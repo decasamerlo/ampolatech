@@ -24,9 +24,8 @@ class UserPostgresqlRepository implements UserRepositoryPort {
   public Optional<User> findById(UserId id, PharmacyId pharmacyId) {
     return users
         .findByIdAndPharmacyId(id.value(), pharmacyId.value())
-        .map(
-            user ->
-                mapper.toDomain(
-                    user, userRoles.findByUserIdAndPharmacyId(id.value(), pharmacyId.value())));
+        .map(user ->
+            mapper.toDomain(
+                user, userRoles.findByUserIdAndPharmacyId(id.value(), pharmacyId.value())));
   }
 }
